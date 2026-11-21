@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name=”robots” content=”noindex, nofollow” >
+<title>祝福の食卓</title>
+<style>
+  :root {
+    --bg-main: #12100e;
+    --bg-card: #1b1815;
+    --bg-sub: #25201b;
+    --text-main: #e2d8c8;
+    --text-muted: #968977;
+    --accent-gold: #c29b57;
+    --accent-green: #587856;
+    --accent-blue: #52738a;
+    --accent-danger: #9e2a2b;
+    --border-color: #3d342b;
+    --border-highlight: #5e4f3e;
+    --shadow: 0 4px 16px rgba(0, 0, 0, 0.65);
+    --vignette: inset 0 0 40px rgba(0, 0, 0, 0.6);
+  }
+
+  /* 摩耗度による画面の深淵化 */
+  body.decay-1 {
+    --bg-main: #100d0c;
+    --bg-card: #181412;
+    --vignette: inset 0 0 65px rgba(40, 5, 5, 0.65);
+  }
+  body.decay-2 {
+    --bg-main: #0d0909;
+    --bg-card: #161010;
+    --border-color: #4a2828;
+    --accent-gold: #a67641;
+    --vignette: inset 0 0 90px rgba(75, 8, 8, 0.75);
+  }
+  body.decay-3 {
+    --bg-main: #090505;
+    --bg-card: #120b0b;
+    --bg-sub: #1c1111;
+    --border-color: #5c2323;
+    --text-main: #d6c5c5;
+    --accent-gold: #8c4a32;
+    --vignette: inset 0 0 120px rgba(110, 10, 10, 0.85);
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100dvh;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif JP", Georgia, serif;
+    font-size: 15px;
+    line-height: 1.55;
+    overflow-x: hidden;
+    transition: background-color 1.2s ease, box-shadow 1.2s ease;
+  }
+
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: var(--vignette);
+    z-index: 900;
+  }
+
+  /* コンテナ */
+  #app {
+    max-width: 640px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ヘッダー（重厚な台帳風） */
+  header {
+    background: var(--bg-card);
+    border: 1px solid var(--border-highlight);
+    outline: 1px solid var(--border-color);
+    outline-offset: -4px;
+    border-radius: 4px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .day-badge {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--accent-gold);
+    letter-spacing: 0.08em;
+  }
+
+  .stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .stat-pill {
+    background: var(--bg-sub);
+    border: 1px solid var(--border-color);
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  /* アクションボタン群（全体コマンド） */
+  .global-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    border: 1px solid var(--border-highlight);
+    border-radius: 3px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s, background-color 0.2s, border-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    touch-action: manipulation;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  }
+
+  button:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
+  button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(180deg, #5c4526, #3d2c16);
+    color: #f2e6d0;
+    border-color: var(--accent-gold);
+  }
+  .btn-green {
+    background: linear-gradient(180deg, #354a34, #223021);
+    color: #dce8db;
+    border-color: var(--accent-green);
+  }
+  .btn-blue {
+    background: linear-gradient(180deg, #2e4352, #1d2b36);
+    color: #d8e6f0;
+    border-color: var(--accent-blue);
+  }
+  .btn-danger {
+    background: linear-gradient(180deg, #6b1d1e, #421011);
+    color: #f7dada;
+    border-color: #b83b3b;
+  }
+  .btn-outline {
+    background: var(--bg-sub);
+    color: var(--text-main);
+    border-color: var(--border-color);
+  }
+  .btn-outline:hover:not(:disabled) {
+    border-color: var(--accent-gold);
+  }
+
+  /* 園児カード一覧 */
+  .children-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .child-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-highlight);
+    border-radius: 4px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+    position: relative;
+  }
+
+  .child-card::before {
+    content: "";
+    position: absolute;
+    top: 3px; left: 3px; right: 3px; bottom: 3px;
+    border: 1px solid rgba(194, 155, 87, 0.12);
+    pointer-events: none;
+  }
+
+  .child-card.heretic {
+    border: 1px solid #b83b3b;
+    background: linear-gradient(180deg, #241111, #170b0b);
+    box-shadow: 0 0 15px rgba(158, 42, 43, 0.35);
+  }
+
+  .child-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-color);
+    gap: 8px;
+  }
+
+  .child-name-area {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .child-name {
+    font-weight: 700;
+    font-size: 1.08rem;
+    color: var(--accent-gold);
+    letter-spacing: 0.06em;
+  }
+
+  .child-card.heretic .child-name {
+    color: #e05a5a;
+  }
+
+  .trait-badge {
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    background: var(--bg-sub);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+  }
+
+  .heretic-badge {
+    font-size: 0.75rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    background: #6b1414;
+    border: 1px solid #d94848;
+    color: #ffdede;
+    font-weight: 700;
+    animation: pulse 1.6s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+
+  /* ゲージ類 */
+  .bars {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  .bar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+
+  .bar-label {
+    width: 72px;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 7px;
+    background: #0c0a09;
+    border: 1px solid var(--border-color);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    transition: width 0.35s ease;
+  }
+
+  .fill-growth { background: linear-gradient(90deg, #8c662e, #c29b57); }
+  .fill-faith { background: linear-gradient(90deg, #345269, #5c87a6); }
+  .fill-fear { background: linear-gradient(90deg, #6e191a, #b83234); }
+
+  .bar-val {
+    width: 38px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  /* セリフ・日記枠 */
+  .child-quote {
+    background: rgba(12, 10, 9, 0.65);
+    border-left: 2px solid var(--accent-gold);
+    padding: 8px 10px;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
+    color: var(--text-main);
+    word-break: break-word;
+  }
+
+  .child-card.heretic .child-quote {
+    background: rgba(50, 10, 10, 0.7);
+    border-left-color: #d94848;
+    color: #f5c6c6;
+    font-weight: 600;
+  }
+
+  /* 個別コマンドボタン */
+  .child-actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .child-actions button {
+    padding: 8px 4px;
+    font-size: 0.8rem;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ship-btn {
+    grid-column: 1 / -1;
+    background: linear-gradient(180deg, #6e4e23, #453013);
+    border-color: #d4af37;
+    color: #fff3d6;
+    font-size: 0.92rem !important;
+    padding: 10px !important;
+    margin-bottom: 2px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ログエリア */
+  .log-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-highlight);
+    border-radius: 4px;
+    padding: 10px 12px;
+    margin-top: auto;
+    max-height: 185px;
+    overflow-y: auto;
+    font-size: 0.82rem;
+    box-shadow: var(--shadow);
+  }
+
+  .log-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--accent-gold);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .log-entry {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(61, 52, 43, 0.5);
+    word-break: break-word;
+    color: var(--text-muted);
+  }
+  .log-entry:first-child { color: var(--text-main); }
+  .log-entry:last-child { border-bottom: none; }
+  .log-danger { color: #d9534f !important; font-weight: 600; }
+  .log-good { color: #8ab886 !important; }
+
+  /* モーダル（イベント・2択・エンディング） */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 4, 3, 0.86);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+  }
+
+  .modal-box {
+    background: var(--bg-card);
+    color: var(--text-main);
+    width: 100%;
+    max-width: 500px;
+    max-height: 88dvh;
+    overflow-y: auto;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
+    border: 1px solid var(--accent-gold);
+    outline: 1px solid var(--border-color);
+    outline-offset: -5px;
+  }
+
+  .modal-box.ending-blood {
+    background: #140606;
+    color: #ebd5d5;
+    border-color: #9e2a2b;
+  }
+
+  .modal-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.06em;
+    margin: 0 0 14px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-highlight);
+  }
+
+  .modal-box.ending-blood .modal-title {
+    border-bottom-color: #6b1d1e;
+    color: #e05252;
+  }
+
+  .modal-body {
+    font-size: 0.94rem;
+    margin-bottom: 18px;
+    white-space: pre-line;
+    word-break: break-word;
+    line-height: 1.65;
+  }
+
+  .modal-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .modal-choices button {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    padding: 12px 14px;
+    line-height: 1.45;
+  }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ヘッダー情報 -->
+  <header>
+    <div class="header-top">
+      <div class="day-badge" id="ui-day">第 1 日 / 全 25 日</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-outline" style="padding:4px 9px; font-size:0.75rem;" onclick="UI.openDiaryModal()">観察日誌</button>
+        <button class="btn-outline" style="padding:4px 9px; font-size:0.75rem;" onclick="Game.confirmReset()">初期化</button>
+      </div>
+    </div>
+    <div class="stats-row">
+      <span class="stat-pill" id="ui-ap">残り行動: 3 / 3</span>
+      <span class="stat-pill" id="ui-budget">運営資金: 1000G</span>
+      <span class="stat-pill" id="ui-shipped">卒業(出荷): 0人</span>
+      <span class="stat-pill" id="ui-escaped">逃亡: 0人</span>
+    </div>
+  </header>
+
+  <!-- 全体コマンド -->
+  <div class="global-actions">
+    <button class="btn-blue" id="btn-prayer-all" onclick="Game.massPrayer()">礼拝堂で全員祈祷 (AP1)</button>
+    <button class="btn-primary" id="btn-next-day" onclick="Game.nextDay()">一日を終える ➔</button>
+  </div>
+
+  <!-- 園児リスト -->
+  <div class="children-grid" id="ui-children"></div>
+
+  <!-- 施設ログ -->
+  <div class="log-panel" id="ui-log-panel">
+    <div class="log-title">
+      <span>聖園管理台帳・記録</span>
+      <span id="ui-moral-label" style="font-weight:normal; color:var(--text-muted);">園長の心: 穏やか</span>
+    </div>
+    <div id="ui-logs"></div>
+  </div>
+</div>
+
+<!-- 汎用モーダル（イベント・異端児・エンディング・日記） -->
+<div class="modal-overlay hidden" id="ui-modal">
+  <div class="modal-box" id="ui-modal-box">
+    <h3 class="modal-title" id="ui-modal-title">タイトル</h3>
+    <div class="modal-body" id="ui-modal-body">本文</div>
+    <div class="modal-choices" id="ui-modal-choices"></div>
+  </div>
+</div>
+
+<script>
+/**
+ * 聖園の園長日誌 - コアロジック
+ */
+const STORAGE_KEY = 'seien_save_v1';
+const MAX_DAYS = 25;
+
+const TRAITS = [
+  { id: 'devout', name: '純粋無垢', desc: '信仰心が上がりやすく下がりにくい', faithMod: 1.3, fearMod: 0.8, growthMod: 1.0 },
+  { id: 'sharp', name: '勘が鋭い', desc: '違和感を察知しやすく恐怖が溜まりやすい', faithMod: 0.8, fearMod: 1.35, growthMod: 1.0 },
+  { id: 'glutton', name: '食いしん坊', desc: '食事による育成度の上昇が高い', faithMod: 1.0, fearMod: 1.0, growthMod: 1.35 },
+  { id: 'timid', name: '臆病', desc: '他人の影響を受けやすく恐怖が伝染しやすい', faithMod: 1.0, fearMod: 1.25, growthMod: 0.9 },
+  { id: 'leader', name: '面倒見が良い', desc: '周囲に影響を与えやすい。異端化すると危険', faithMod: 1.1, fearMod: 1.0, growthMod: 1.05 }
+];
+
+const NAME_POOL = ['ハル', 'ミオ', 'レン', 'ソラ', 'ユイ', 'リク', 'ナナ', 'カイト', 'コハル', 'アサヒ', 'ヒナタ', 'ツムギ'];
+
+const NORMAL_QUOTES = [
+  '「今日のごはんもとっても美味しかったよ！早く大きくなりたいな」',
+  '「卒業したら、お空の上でずっと幸せになれるんだよね？」',
+  '「園長先生、いつも僕たちのために美味しいご飯を作ってくれてありがとう！」',
+  '「昨日みんなでお祈りしたとき、すごく温かい気持ちになったんだ」',
+  '「ねえ、僕もうすぐ立派になれるかな？ 早く選ばれたいな！」',
+  '「お外の世界は怖いところなんだよね。聖園が一番幸せだよ」',
+  '「お友達と一緒に卒業できたら、もっと嬉しいのになあ」',
+  '「体重が増えると、園長先生がすごく褒めてくれるから嬉しい！」',
+  '「今日はたくさん遊んでぐっすり眠れそう。おやすみなさい、園長先生」',
+  '「卒業したあの子、今ごろ美味しいご馳走になって喜んでるかな！」'
+];
+
+const DOUBT_QUOTES = [
+  '「……ねえ、卒業した子から、どうして一度もお手紙が来ないの？」',
+  '「昨日、調理場の裏で変な匂いがしたんだ。あれは何の匂い？」',
+  '「お肉を食べるたびに、なんだか自分の体を見られている気がする……」',
+  '「夜中に大人たちが話してるのを聞いたよ。『出荷』ってどういう意味？」',
+  '「卒業した子の靴、どうしてまだ玄関の奥にしまってあるの？」',
+  '「怖い夢を見たんだ。真っ白なお皿の上に、僕が乗っている夢……」',
+  '「ねえ園長先生、僕たち本当にお空に行くの？ どこにも連れて行かれない？」'
+];
+
+const DAILY_EVENTS = [
+  {
+    title: '見覚えのある靴',
+    text: (c) => `${c.name}が倉庫の隅から、先日「卒業」したはずの園児の小さな靴を見つけて持ってきた。\n「ねえ園長先生、これあの子の靴だよね？ どうして天国に行くのに靴を忘れていったの？」`,
+    choices: [
+      {
+        text: '「天国では新しい綺麗な靴が用意されているから、置いていったんだよ」と微笑む',
+        effect: (s, c) => { c.faith += 8; c.fear -= 4; s.moralDecay += 1; return `${c.name}は納得したように笑い、靴を大切に抱きしめた。`; }
+      },
+      {
+        text: '「勝手に倉庫に入ってはいけません」と優しく叱り、靴を取り上げる',
+        effect: (s, c) => { c.fear += 14; c.faith -= 6; return `${c.name}は少し怯えた様子で引き下がったが、疑問は残ったようだ。`; }
+      },
+      {
+        text: '「……見間違いだよ。さあ、美味しいおやつの時間だ」と話題を逸らす',
+        effect: (s, c) => { c.growth += 6; c.fear += 8; s.moralDecay += 1; return `${c.name}はおやつに喜んだが、ふとした瞬間に倉庫の方を見つめている。`; }
+      }
+    ]
+  },
+  {
+    title: '特別な栄養食',
+    text: (c) => `本部から高栄養の特殊飼料（サプリメント）が届いた。与えると一気に体が育つが、独特の苦味がある。\n${c.name}はスプーンを前に少し首を傾げている。`,
+    choices: [
+      {
+        text: '「立派に卒業するための魔法のお薬だよ」と飲ませる',
+        effect: (s, c) => { c.growth += 18; c.faith += 5; c.fear += 6; return `${c.name}は鼻をつまんで飲み干した。「これで早く選ばれるかな！」`; }
+      },
+      {
+        text: '無理強いはせず、いつもの温かいスープだけを与える',
+        effect: (s, c) => { c.growth += 6; c.fear -= 8; return `${c.name}は安心したようにスープを飲み干した。`; }
+      }
+    ]
+  },
+  {
+    title: '夜中の物音',
+    text: (c) => `昨晩、搬入トラックのエンジン音と重い扉の閉まる音が響いた。\n朝食の席で、${c.name}が眠そうな目をこすりながら尋ねてくる。「夜中に誰か来たの？」`,
+    choices: [
+      {
+        text: '「君たちの幸せを願う天使様が、プレゼントを届けてくれたんだよ」',
+        effect: (s, c) => { c.faith += 12; s.moralDecay += 1; return `${c.name}は目を輝かせ、他の子供たちにも嬉しそうに話し始めた。`; }
+      },
+      {
+        text: '「食材の配達だよ。早く食べて大きくならないとね」と事務的に答える',
+        effect: (s, c) => { c.fear += 12; c.faith -= 8; s.moralDecay += 2; return `${c.name}はスプーンを止め、気まずそうに俯いた。`; }
+      }
+    ]
+  },
+  {
+    title: '無邪気な絵日記',
+    text: (c) => `${c.name}がクレヨンで描いた絵を見せてくれた。そこには、笑顔の子供たちが大きなテーブルの上に並んで寝転んでいる絵が描かれている。\n「みんなでおいしいごちそうになる絵だよ！ じょうず？」`,
+    choices: [
+      {
+        text: '頭を撫でて「とても素晴らしい絵だね。きっと一番美味しいごちそうになれるよ」と褒める',
+        effect: (s, c) => { c.faith += 15; c.growth += 5; s.moralDecay += 2; return `${c.name}は満面の笑みで絵を壁に貼った。周囲の子供たちも羨ましそうに眺めている。`; }
+      },
+      {
+        text: '胸の奥が痛み、言葉に詰まりながらも「……そうだね、上手だね」とだけ答える',
+        effect: (s, c) => { c.faith += 4; return `${c.name}は少し不思議そうにしたが、嬉しそうに頷いた。`; }
+      }
+    ]
+  },
+  {
+    title: '身体測定の日',
+    text: (c) => `定期検診で${c.name}の体格と肉付きを確認した。順調に育っているが、${c.name}は自分の二の腕をつまみながら不安そうに聞いてきた。\n「ねえ、僕ちゃんと美味しくなってる？ 固かったりしない？」`,
+    choices: [
+      {
+        text: '「最高に柔らかく、立派に育っているよ」と優しく抱きしめる',
+        effect: (s, c) => { c.faith += 10; c.fear -= 10; s.moralDecay += 1; return `${c.name}はホッとしたように園長の胸に顔を埋めた。`; }
+      },
+      {
+        text: '「もっと食べて運動しないと出荷基準に届かないよ」と発破をかける',
+        effect: (s, c) => { c.growth += 12; c.fear += 10; return `${c.name}は少し緊張した面持ちで「うん、頑張る……」と頷いた。`; }
+      }
+    ]
+  },
+  {
+    title: 'フェンスの向こう側',
+    text: (c) => `中庭で遊んでいた${c.name}が、高いフェンスの隙間から外の世界を覗き込んでいた。\n「お外を歩いてる人たち、みんな普通の服を着てるね。どうして僕たちだけいつも白い服なの？」`,
+    choices: [
+      {
+        text: '「君たちは特別に選ばれた神聖な子供たちだからだよ」と教える',
+        effect: (s, c) => { c.faith += 10; c.fear -= 5; s.moralDecay += 1; return `${c.name}は自分の白い服の裾を誇らしげに握りしめた。`; }
+      },
+      {
+        text: 'フェンスから引き離し、「外は汚れていて危険だから見てはいけません」と叱る',
+        effect: (s, c) => { c.fear += 15; c.faith -= 5; return `${c.name}は驚いて後ずさりし、部屋へ戻っていった。`; }
+      }
+    ]
+  },
+  {
+    title: '体調不良の訴え',
+    text: (c) => `${c.name}が微熱を出してベッドで横になっている。放置すると肉質（育成度）が落ちてしまうが、薬を使うには資金がかかる。`,
+    choices: [
+      {
+        text: '高価な栄養点滴と薬を投与する（資金 -200G）',
+        cond: (s) => s.budget >= 200,
+        effect: (s, c) => { s.budget -= 200; c.growth += 5; c.fear -= 10; return `手厚い看護に${c.name}は感謝し、すぐに元気を取り戻した。`; }
+      },
+      {
+        text: '温かいお粥だけ食べさせて様子を見る',
+        effect: (s, c) => { c.growth -= 8; c.fear += 4; return `${c.name}はなんとか熱を下げたが、少し痩せてしまった。`; }
+      }
+    ]
+  }
+];
+
+const Game = {
+  state: null,
+  isBusy: false,
+
+  createInitialState() {
+    const shuffledNames = [...NAME_POOL].sort(() => Math.random() - 0.5);
+    const children = [];
+    for (let i = 0; i < 5; i++) {
+      const trait = TRAITS[Math.floor(Math.random() * TRAITS.length)];
+      children.push({
+        id: 'c_' + Date.now() + '_' + i,
+        name: shuffledNames[i],
+        trait: trait,
+        growth: 15 + Math.floor(Math.random() * 15),
+        faith: 65 + Math.floor(Math.random() * 20),
+        fear: 5 + Math.floor(Math.random() * 10),
+        heretic: false,
+        inspected: false,
+        quote: NORMAL_QUOTES[i % NORMAL_QUOTES.length],
+        diary: [`入園初日。白くて綺麗なお部屋！ここでいっぱい食べて立派に卒業するんだ。`]
+      });
+    }
+
+    return {
+      day: 1,
+      ap: 3,
+      maxAp: 3,
+      budget: 1000,
+      shippedCount: 0,
+      escapedCount: 0,
+      killedCount: 0,
+      moralDecay: 0,
+      isEnded: false,
+      children: children,
+      logs: [
+        { text: '聖園の新たな育成期が始まった。期限の25日目までに子供たちを育て上げ、卒業（出荷）させなければならない。', type: 'normal' }
+      ]
+    };
+  },
+
+  init() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.children) && typeof parsed.day === 'number') {
+          this.state = parsed;
+          this.sanitizeState();
+        } else {
+          this.state = this.createInitialState();
+        }
+      } else {
+        this.state = this.createInitialState();
+      }
+    } catch (e) {
+      console.error('Save load failed, resetting:', e);
+      this.state = this.createInitialState();
+    }
+    this.save();
+    UI.render();
+  },
+
+  sanitizeState() {
+    const s = this.state;
+    s.day = Math.max(1, Math.min(MAX_DAYS + 1, Number(s.day) || 1));
+    s.ap = Math.max(0, Number(s.ap) || 0);
+    s.budget = Math.max(0, Number(s.budget) || 0);
+    s.moralDecay = Math.max(0, Number(s.moralDecay) || 0);
+
+    s.children.forEach(c => {
+      c.growth = Math.max(0, Math.min(100, Math.round(Number(c.growth) || 0)));
+      c.faith = Math.max(0, Math.min(100, Math.round(Number(c.faith) || 0)));
+      c.fear = Math.max(0, Math.min(100, Math.round(Number(c.fear) || 0)));
+    });
+  },
+
+  save() {
+    try {
+      this.sanitizeState();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
+    } catch (e) {
+      console.error('Save failed:', e);
+    }
+  },
+
+  addLog(text, type = 'normal') {
+    this.state.logs.unshift({ text: `[第${this.state.day}日] ${text}`, type });
+    if (this.state.logs.length > 40) this.state.logs.pop();
+  },
+
+  consumeAp(cost = 1) {
+    if (this.state.ap < cost) {
+      alert('本日の行動回数（AP）が尽きている。「一日を終える」を選択せよ。');
+      return false;
+    }
+    this.state.ap -= cost;
+    return true;
+  },
+
+  actChild(childId, actionType) {
+    if (this.isBusy || this.state.isEnded) return;
+    const child = this.state.children.find(c => c.id === childId);
+    if (!child || child.heretic) return;
+
+    if (!this.consumeAp(1)) return;
+
+    const t = child.trait;
+    if (actionType === 'feed') {
+      if (this.state.budget < 100) {
+        this.state.ap += 1;
+        alert('運営資金が不足している（給餌には100G必要）。');
+        return;
+      }
+      this.state.budget -= 100;
+      const up = Math.round((16 + Math.random() * 6) * t.growthMod);
+      const fearUp = Math.round((3 + Math.random() * 4) * t.fearMod);
+      child.growth += up;
+      child.fear += fearUp;
+      child.quote = '「もぐもぐ……すごく美味しい！ これでまた卒業に近づいたね！」';
+      child.diary.push(`${this.state.day}日目：特別なご飯を食べた。体がぽかぽかして重くなったよ。`);
+      this.addLog(`${child.name}に高栄養の食事を与えた。（育成 +${up}% / 恐怖 +${fearUp}）`);
+    } else if (actionType === 'pray') {
+      const faithUp = Math.round((15 + Math.random() * 6) * t.faithMod);
+      const fearDown = 6;
+      child.faith += faithUp;
+      child.fear -= fearDown;
+      child.quote = '「神様、園長先生、僕たちを美味しく育ててくれてありがとうございます……」';
+      child.diary.push(`${this.state.day}日目：園長先生と一緒にお祈りした。食べられる日が楽しみで仕方ない。`);
+      this.addLog(`${child.name}と密室で祈祷を行った。（信仰 +${faithUp} / 恐怖 -${fearDown}）`, 'good');
+    } else if (actionType === 'play') {
+      const fearDown = Math.round(18 + Math.random() * 7);
+      const faithUp = Math.round(4 * t.faithMod);
+      child.fear -= fearDown;
+      child.faith += faithUp;
+      child.quote = '「わーい！ 園長先生と遊ぶの大好き！ ずっとここにいたいな……あ、でも早く卒業もしなきゃ！」';
+      child.diary.push(`${this.state.day}日目：みんなでたくさん遊んで笑った。聖園は本当に天国みたい。`);
+      this.addLog(`${child.name}と無邪気に遊んで疑念を和らげた。（恐怖 -${fearDown}）`, 'good');
+    } else if (actionType === 'inspect') {
+      child.inspected = true;
+      const risk = child.fear >= 60 || child.faith <= 35 ? '【警戒：真実に気づきかけている】' : '【良好：純粋な信仰を保っている】';
+      child.quote = `「くすぐったいよ園長先生！ 僕の体、ちゃんと美味しく育ってる？」`;
+      this.addLog(`${child.name}の検品完了。性質[${t.name}] / ${risk}`);
+    }
+
+    this.checkChildState(child);
+    this.save();
+    UI.render();
+  },
+
+  massPrayer() {
+    if (this.isBusy || this.state.isEnded) return;
+    if (!this.consumeAp(1)) return;
+
+    this.state.children.forEach(c => {
+      if (!c.heretic) {
+        c.faith += Math.round(8 * c.trait.faithMod);
+        c.fear -= 4;
+      }
+    });
+    this.addLog('礼拝堂で全員揃って祈祷を捧げた。薄暗い聖堂に無垢な賛美歌が響く。', 'good');
+    this.save();
+    UI.render();
+  },
+
+  shipChild(childId) {
+    if (this.isBusy || this.state.isEnded) return;
+    const idx = this.state.children.findIndex(c => c.id === childId);
+    if (idx === -1) return;
+    const child = this.state.children[idx];
+
+    if (child.growth < 100 || child.heretic) return;
+
+    this.isBusy = true;
+    const isHappy = child.faith >= 50;
+    const reward = isHappy ? 650 : 400;
+
+    UI.showModal(
+      `卒業の儀式：${child.name}`,
+      isHappy
+        ? `${child.name}は真っ白な晴れ着に身を包み、満面の笑みで重い扉の前に立っている。\n\n「園長先生、今まで本当にありがとう！ 僕、最高に美味しいごちそうになって、みんなを幸せにするね！」\n\n迎えの黒い馬車に乗り込む瞬間まで、${child.name}は嬉しそうに手を振り続けていた。\n（出荷報酬 +${reward}G を獲得）`
+        : `${child.name}は少し不安そうに震えながらも、園長の言葉に従って迎えの車に乗り込んだ。\n\n「……本当に、お空の上に行けるんだよね……？」\n\n扉が閉まる直前、${child.name}の瞳から一粒の涙がこぼれた。\n（出荷報酬 +${reward}G を獲得／残った園児たちの恐怖度が少し上昇）`,
+      [
+        {
+          text: '穏やかな微笑みで見送る',
+          cls: 'btn-primary',
+          action: () => {
+            this.state.children.splice(idx, 1);
+            this.state.shippedCount += 1;
+            this.state.budget += reward;
+            if (!isHappy) {
+              this.state.children.forEach(other => other.fear += 10);
+              this.state.moralDecay += 1;
+            }
+            this.addLog(`${child.name}が「卒業」を果たした。（報酬 +${reward}G）`, 'good');
+            this.isBusy = false;
+            UI.closeModal();
+            this.checkAllGone();
+            this.save();
+            UI.render();
+          }
+        }
+      ]
+    );
+  },
+
+  checkChildState(child) {
+    this.sanitizeState();
+    if (!child.heretic && (child.faith <= 20 || child.fear >= 85)) {
+      child.heretic = true;
+      child.quote = '「嘘だ！！ 卒業なんて嘘だ！！ 僕たちは人間たちに食べられるんだ！ みんな逃げよう！！」';
+      this.addLog(`【異端発生】${child.name}が真実に気づき、周囲に逃亡を呼びかけ始めた！`, 'danger');
+    }
+  },
+
+  nextDay() {
+    if (this.isBusy || this.state.isEnded) return;
+    this.isBusy = true;
+
+    const heretics = this.state.children.filter(c => c.heretic);
+    if (heretics.length > 0) {
+      heretics.forEach(h => {
+        this.state.children.forEach(other => {
+          if (other.id !== h.id && !other.heretic) {
+            const spread = h.trait.id === 'leader' ? 22 : 14;
+            other.faith -= spread;
+            other.fear += spread;
+          }
+        });
+      });
+      this.addLog(`異端化した園児の叫びにより、聖園内に疑念と恐怖が伝染している……！`, 'danger');
+    }
+
+    this.state.children.forEach(c => {
+      if (!c.heretic) {
+        c.faith -= 3;
+        c.fear += 2;
+        if (c.fear >= 50 || c.faith <= 40) {
+          c.quote = DOUBT_QUOTES[Math.floor(Math.random() * DOUBT_QUOTES.length)];
+        } else {
+          c.quote = NORMAL_QUOTES[Math.floor(Math.random() * NORMAL_QUOTES.length)];
+        }
+      }
+      this.checkChildState(c);
+    });
+
+    const runners = this.state.children.filter(c => c.fear >= 100 && !c.heretic);
+    if (runners.length > 0) {
+      runners.forEach(r => {
+        this.state.escapedCount += 1;
+        this.addLog(`【脱走】恐怖に耐えかねた${r.name}が闇夜に紛れて鉄柵を乗り越えた！`, 'danger');
+      });
+      this.state.children = this.state.children.filter(c => !(c.fear >= 100 && !c.heretic));
+    }
+
+    this.state.day += 1;
+    this.state.ap = this.state.maxAp;
+    this.sanitizeState();
+
+    if (this.state.day > MAX_DAYS || this.state.children.length === 0) {
+      this.isBusy = false;
+      this.triggerEnding();
+      return;
+    }
+
+    const activeHeretic = this.state.children.find(c => c.heretic);
+    if (activeHeretic) {
+      this.triggerHereticCrisis(activeHeretic);
+      return;
+    }
+
+    if (Math.random() < 0.75 && this.state.children.length > 0) {
+      const target = this.state.children[Math.floor(Math.random() * this.state.children.length)];
+      const ev = DAILY_EVENTS[Math.floor(Math.random() * DAILY_EVENTS.length)];
+      const validChoices = ev.choices.filter(ch => !ch.cond || ch.cond(this.state));
+
+      UI.showModal(
+        `出来事：${ev.title}`,
+        ev.text(target),
+        validChoices.map(ch => ({
+          text: ch.text,
+          cls: 'btn-outline',
+          action: () => {
+            const resText = ch.effect(this.state, target);
+            this.addLog(resText);
+            this.checkChildState(target);
+            this.isBusy = false;
+            UI.closeModal();
+            this.save();
+            UI.render();
+          }
+        }))
+      );
+    } else {
+      this.isBusy = false;
+      this.save();
+      UI.render();
+    }
+  },
+
+  triggerHereticCrisis(heretic) {
+    const othersCount = this.state.children.filter(c => c.id !== heretic.id).length;
+
+    UI.showModal(
+      `【異端審問】${heretic.name}の反乱`,
+      `${heretic.name}が食堂の椅子の上に立ち、涙と鼻水を流しながら叫んでいる！\n\n「目を覚ましてよみんな！！ 卒業した子は誰も天国になんて行ってない！ 僕たちはただの家畜なんだ！ 早く逃げないと食べられちゃう！！」\n\n他の子供たちが動揺し、重い玄関扉の方を振り返っている。どう対処する？`,
+      [
+        {
+          text: '優しく抱きしめて説得する（「悪い夢を見たんだね、大丈夫だよ」）',
+          cls: 'btn-blue',
+          action: () => {
+            const successChance = 0.35 + (heretic.faith / 100);
+            if (Math.random() < successChance) {
+              heretic.heretic = false;
+              heretic.faith = 55;
+              heretic.fear = 35;
+              heretic.quote = '「……ごめんなさい、園長先生。僕、怖い夢を見ていたみたい……」';
+              this.addLog(`${heretic.name}は園長の言葉に泣き崩れ、再び純粋な信仰を取り戻した。`, 'good');
+              this.isBusy = false;
+              UI.closeModal();
+              this.save();
+              UI.render();
+            } else {
+              const escapedNow = this.state.children.length;
+              this.state.escapedCount += escapedNow;
+              this.state.children = [];
+              this.addLog(`説得は失敗した！ ${heretic.name}が園長を突き飛ばし、全員で玄関から闇夜へ逃げ出した！`, 'danger');
+              this.isBusy = false;
+              UI.closeModal();
+              this.triggerEnding();
+            }
+          }
+        },
+        {
+          text: '「病気の発作だ」と偽り、地下の特別室へ隔離する',
+          cls: 'btn-primary',
+          action: () => {
+            this.state.moralDecay += 2;
+            this.state.children = this.state.children.filter(c => c.id !== heretic.id);
+            this.state.children.forEach(other => {
+              other.fear += 22;
+              other.faith -= 10;
+              this.checkChildState(other);
+            });
+            this.addLog(`${heretic.name}を地下室へ隔離（事実上の廃棄）した。残された子供たちは怯えている。`, 'danger');
+            this.isBusy = false;
+            UI.closeModal();
+            this.checkAllGone();
+            this.save();
+            UI.render();
+          }
+        },
+        {
+          text: 'その場で「処分（始末）」して口を封じる',
+          cls: 'btn-danger',
+          action: () => {
+            this.state.moralDecay += 4;
+            this.state.killedCount += 1;
+            this.state.children = this.state.children.filter(c => c.id !== heretic.id);
+
+            if (othersCount === 0) {
+              this.addLog(`${heretic.name}を始末した。聖園にはもう誰も残っていない。`, 'danger');
+              this.isBusy = false;
+              UI.closeModal();
+              this.triggerEnding('slaughter');
+              return;
+            }
+
+            UI.showModal(
+              '取り返しのつかない惨劇',
+              `鈍い音とともに${heretic.name}が床に崩れ落ち、冷たい石床に赤いシミが広がっていく。\n\nそれを目撃した${othersCount}人の子供たちが、悲鳴を上げて一斉に玄関へ殺到した！\n閂（かんぬき）を外されるまであと数秒しかない。どうする！？`,
+              [
+                {
+                  text: '諦めて扉を開けさせ、全員を逃がす',
+                  cls: 'btn-outline',
+                  action: () => {
+                    this.state.escapedCount += this.state.children.length;
+                    this.state.children = [];
+                    this.addLog('子供たちは泣き叫びながら夜の闇へと走り去っていった……。', 'danger');
+                    this.isBusy = false;
+                    UI.closeModal();
+                    this.triggerEnding();
+                  }
+                },
+                {
+                  text: '秘密を守るため、逃げ惑う子供たちを【全員始末する】',
+                  cls: 'btn-danger',
+                  action: () => {
+                    this.state.killedCount += this.state.children.length;
+                    this.state.children = [];
+                    this.state.moralDecay += 10;
+                    this.isBusy = false;
+                    UI.closeModal();
+                    this.triggerEnding('slaughter');
+                  }
+                }
+              ]
+            );
+          }
+        }
+      ]
+    );
+  },
+
+  checkAllGone() {
+    if (this.state.children.length === 0 && !this.state.isEnded) {
+      this.triggerEnding();
+    }
+  },
+
+  triggerEnding(forceType = null) {
+    this.state.isEnded = true;
+    const s = this.state;
+    const total = s.shippedCount + s.escapedCount + s.killedCount;
+
+    let title = '';
+    let body = '';
+    let isBlood = false;
+
+    if (forceType === 'slaughter' || (s.killedCount > 0 && s.shippedCount === 0 && s.escapedCount === 0)) {
+      isBlood = true;
+      title = '終幕 III：『空っぽの聖園』（惨劇の跡）';
+      body = `静寂が戻った食堂には、柱時計の秒針の音だけが響いている。\n\n白かった壁も、清潔だった床も、可愛らしい絵日記も、すべてが赤黒く染まり果てていた。\n\nここが数時間前まで綺麗な聖園だったとはおよそ思えない。\n\nあなたは返り血を拭うことも忘れ、ただ動かなくなった小さな体を見つめ続けていた。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 始末：${s.killedCount}人`;
+    } else if (s.escapedCount === 0 && s.killedCount === 0 && s.shippedCount > 0) {
+      title = '終幕 I：『祝福の食卓』';
+      body = `すべての子供たちが、最後まで「食べられる幸せ」を信じきったまま、満面の笑みで聖園を卒業していった。\n\n本部からは「最高の肉質と純粋さだった」と多額の報奨金と賛辞が贈られた。\n\nステンドグラスから光の差し込む清潔な部屋では、すでに次の無垢な子供たちを迎えるための白いシーツが整えられている。\n\nあなたは穏やかな微笑みを浮かべ、新しい園児たちの到着を待った。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：0人`;
+    } else if (s.shippedCount >= Math.ceil(total / 2) && s.shippedCount > 0) {
+      title = '終幕 II：『ほころびた楽園』';
+      body = `何人かの子供に逃げられ、いくつかの「不祥事」を闇に葬ることになったものの、過半数の子供たちは無事に『卒業』を果たした。\n\n聖園の運営はなんとか継続が決まり、今日も礼拝堂には子供たちの無邪気な賛美歌が響いている。\n\nしかし、夜の闇へ消えたあの子供たちが、外の世界で何を語るのか——鉄格子の窓の外を見つめるあなたの胸には、消えない不安の影が落ちていた。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 処分：${s.killedCount}人`;
+    } else {
+      title = '終幕 III：『空っぽの聖園』（崩壊）';
+      body = `開け放たれた玄関の扉から、冷たい夜風が吹き込んでいる。\n\nほとんどの子供たちが聖園の真実に気づき、外の世界へと逃げ出してしまった。\n\n無人のベッドと、読みかけの絵本だけが取り残された清潔な部屋。\n遠くから、こちらへ向かってくる警邏隊のサイレンの音が少しずつ近づいてくる……。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 処分：${s.killedCount}人`;
+    }
+
+    localStorage.removeItem(STORAGE_KEY);
+    UI.render();
+    UI.showModal(
+      title,
+      body,
+      [
+        {
+          text: '新たな聖園を開く（最初からプレイ）',
+          cls: isBlood ? 'btn-danger' : 'btn-primary',
+          action: () => {
+            UI.closeModal();
+            this.state = this.createInitialState();
+            this.save();
+            UI.render();
+          }
+        }
+      ],
+      isBlood
+    );
+  },
+
+  confirmReset() {
+    if (confirm('現在の進行データを破棄し、第1日からやり直しますか？')) {
+      localStorage.removeItem(STORAGE_KEY);
+      this.state = this.createInitialState();
+      this.save();
+      UI.render();
+    }
+  }
+};
+
+const UI = {
+  render() {
+    const s = Game.state;
+    if (!s) return;
+
+    document.body.classList.remove('decay-1', 'decay-2', 'decay-3');
+    let moralText = '穏やか';
+    if (s.moralDecay >= 10) {
+      document.body.classList.add('decay-3');
+      moralText = '麻痺（冷徹）';
+    } else if (s.moralDecay >= 5) {
+      document.body.classList.add('decay-2');
+      moralText = '鈍化';
+    } else if (s.moralDecay >= 2) {
+      document.body.classList.add('decay-1');
+      moralText = 'わずかな曇り';
+    }
+
+    document.getElementById('ui-day').textContent = `第 ${Math.min(s.day, MAX_DAYS)} 日 / 全 ${MAX_DAYS} 日`;
+    document.getElementById('ui-ap').textContent = `残り行動: ${s.ap} / ${s.maxAp}`;
+    document.getElementById('ui-budget').textContent = `資金: ${s.budget}G`;
+    document.getElementById('ui-shipped').textContent = `卒業: ${s.shippedCount}人`;
+    document.getElementById('ui-escaped').textContent = `逃亡: ${s.escapedCount}人`;
+    document.getElementById('ui-moral-label').textContent = `園長の心: ${moralText}`;
+
+    const btnPrayer = document.getElementById('btn-prayer-all');
+    btnPrayer.disabled = s.ap < 1 || s.isEnded;
+
+    const container = document.getElementById('ui-children');
+    container.innerHTML = '';
+
+    s.children.forEach(c => {
+      const card = document.createElement('div');
+      card.className = 'child-card' + (c.heretic ? ' heretic' : '');
+
+      const canShip = c.growth >= 100 && !c.heretic;
+      const traitLabel = c.inspected ? `性質: ${c.trait.name}` : '性質: 未検品';
+
+      card.innerHTML = `
+        <div class="child-header">
+          <div class="child-name-area">
+            <span class="child-name">${this.escapeHtml(c.name)}</span>
+            <span class="trait-badge">${traitLabel}</span>
+            ${c.heretic ? '<span class="heretic-badge">覚醒（逃亡扇動中）</span>' : ''}
+          </div>
+        </div>
+        <div class="bars">
+          <div class="bar-item">
+            <span class="bar-label">育成(肉質)</span>
+            <div class="bar-track"><div class="bar-fill fill-growth" style="width:${c.growth}%"></div></div>
+            <span class="bar-val">${c.growth}%</span>
+          </div>
+          <div class="bar-item">
+            <span class="bar-label">信仰(幸せ)</span>
+            <div class="bar-track"><div class="bar-fill fill-faith" style="width:${c.faith}%"></div></div>
+            <span class="bar-val">${c.faith}%</span>
+          </div>
+          <div class="bar-item">
+            <span class="bar-label">恐怖(疑念)</span>
+            <div class="bar-track"><div class="bar-fill fill-fear" style="width:${c.fear}%"></div></div>
+            <span class="bar-val">${c.fear}%</span>
+          </div>
+        </div>
+        <div class="child-quote">${this.escapeHtml(c.quote)}</div>
+        <div class="child-actions">
+          ${canShip ? `<button class="ship-btn" onclick="Game.shipChild('${c.id}')">✟ 卒業（出荷）を見送る</button>` : ''}
+          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'feed')">
+            <span>給餌</span><small style="font-size:0.65rem;color:var(--text-muted)">-100G</small>
+          </button>
+          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'pray')">
+            <span>祈祷</span><small style="font-size:0.65rem;color:var(--text-muted)">信仰↑</small>
+          </button>
+          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'play')">
+            <span>遊戯</span><small style="font-size:0.65rem;color:var(--text-muted)">恐怖↓</small>
+          </button>
+          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'inspect')">
+            <span>検品</span><small style="font-size:0.65rem;color:var(--text-muted)">状態確認</small>
+          </button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    const logContainer = document.getElementById('ui-logs');
+    logContainer.innerHTML = s.logs.map(l => {
+      const cls = l.type === 'danger' ? 'log-danger' : (l.type === 'good' ? 'log-good' : '');
+      return `<div class="log-entry ${cls}">${this.escapeHtml(l.text)}</div>`;
+    }).join('');
+  },
+
+  openDiaryModal() {
+    const s = Game.state;
+    if (!s || s.children.length === 0) return;
+    const text = s.children.map(c => {
+      const recent = c.diary.slice(-2).join('\n  ');
+      return `■ ${c.name} の絵日記\n  ${recent}`;
+    }).join('\n\n');
+
+    this.showModal(
+      '子供たちの観察日誌',
+      text,
+      [{ text: '台帳を閉じる', cls: 'btn-primary', action: () => this.closeModal() }]
+    );
+  },
+
+  showModal(title, body, choices, isBlood = false) {
+    const overlay = document.getElementById('ui-modal');
+    const box = document.getElementById('ui-modal-box');
+    const titleEl = document.getElementById('ui-modal-title');
+    const bodyEl = document.getElementById('ui-modal-body');
+    const choicesEl = document.getElementById('ui-modal-choices');
+
+    box.className = 'modal-box' + (isBlood ? ' ending-blood' : '');
+    titleEl.textContent = title;
+    bodyEl.textContent = body;
+    choicesEl.innerHTML = '';
+
+    choices.forEach(ch => {
+      const btn = document.createElement('button');
+      btn.className = ch.cls || 'btn-outline';
+      btn.textContent = ch.text;
+      btn.onclick = ch.action;
+      choicesEl.appendChild(btn);
+    });
+
+    overlay.classList.remove('hidden');
+  },
+
+  closeModal() {
+    document.getElementById('ui-modal').classList.add('hidden');
+  },
+
+  escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+};
+
+window.addEventListener('DOMContentLoaded', () => Game.init());
+</script>
+</body>
+</html>
