@@ -45,6 +45,30 @@
     --vignette: inset 0 0 120px rgba(110, 10, 10, 0.85);
   }
 
+  /* 第10話・真実ルート用の静謐な白銀トーン */
+  body.truth-mode {
+    --bg-main: #111317;
+    --bg-card: #181c22;
+    --bg-sub: #21262e;
+    --border-color: #3c4654;
+    --border-highlight: #687991;
+    --accent-gold: #b8cde0;
+    --vignette: inset 0 0 80px rgba(180, 205, 230, 0.14);
+  }
+
+  /* 地獄ルート（光の届かない屋敷）用の漆黒・血闇トーン */
+  body.hell-mode {
+    --bg-main: #050303;
+    --bg-card: #0c0606;
+    --bg-sub: #140909;
+    --border-color: #4a1515;
+    --border-highlight: #7a1c1c;
+    --text-main: #cbb8b8;
+    --text-muted: #7a6363;
+    --accent-gold: #b33636;
+    --vignette: inset 0 0 150px rgba(120, 0, 0, 0.92);
+  }
+
   * {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
@@ -73,7 +97,6 @@
     z-index: 900;
   }
 
-  /* コンテナ */
   #app {
     max-width: 640px;
     margin: 0 auto;
@@ -86,14 +109,13 @@
     z-index: 1;
   }
 
-  /* ヘッダー（重厚な台帳風） */
   header {
     background: var(--bg-card);
     border: 1px solid var(--border-highlight);
     outline: 1px solid var(--border-color);
     outline-offset: -4px;
     border-radius: 4px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     box-shadow: var(--shadow);
     margin-bottom: 12px;
   }
@@ -105,38 +127,66 @@
     margin-bottom: 8px;
     padding-bottom: 6px;
     border-bottom: 1px solid var(--border-color);
+    gap: 8px;
   }
 
   .day-badge {
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
     color: var(--accent-gold);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
+  }
+
+  .header-btns {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   .stats-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    font-size: 0.82rem;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    font-size: 0.72rem;
     color: var(--text-muted);
+  }
+
+  @media (max-width: 440px) {
+    .stats-row {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
   .stat-pill {
     background: var(--bg-sub);
     border: 1px solid var(--border-color);
-    padding: 3px 8px;
+    padding: 3px 5px;
     border-radius: 2px;
     font-weight: 600;
+    color: var(--text-muted);
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .stat-pill.active {
+    border-color: var(--text-main);
     color: var(--text-main);
   }
 
-  /* アクションボタン群（全体コマンド） */
-  .global-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
+  .stat-pill.recorded {
+    border-color: var(--accent-gold);
+    color: var(--accent-gold);
+  }
+
+  .stat-pill.recorded-bad {
+    border-color: #9e2a2b;
+    color: #e07a7a;
+  }
+
+  .stat-pill.secret-pill {
+    border-style: dashed;
   }
 
   button {
@@ -161,32 +211,6 @@
     transform: scale(0.98);
   }
 
-  button:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .btn-primary {
-    background: linear-gradient(180deg, #5c4526, #3d2c16);
-    color: #f2e6d0;
-    border-color: var(--accent-gold);
-  }
-  .btn-green {
-    background: linear-gradient(180deg, #354a34, #223021);
-    color: #dce8db;
-    border-color: var(--accent-green);
-  }
-  .btn-blue {
-    background: linear-gradient(180deg, #2e4352, #1d2b36);
-    color: #d8e6f0;
-    border-color: var(--accent-blue);
-  }
-  .btn-danger {
-    background: linear-gradient(180deg, #6b1d1e, #421011);
-    color: #f7dada;
-    border-color: #b83b3b;
-  }
   .btn-outline {
     background: var(--bg-sub);
     color: var(--text-main);
@@ -196,19 +220,25 @@
     border-color: var(--accent-gold);
   }
 
-  /* 園児カード一覧 */
-  .children-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 14px;
+  .btn-secret {
+    background: linear-gradient(180deg, #2b3847, #19212b);
+    color: #e3f0ff;
+    border-color: #8bb4de;
+    box-shadow: 0 0 14px rgba(139, 180, 222, 0.25);
+  }
+
+  .btn-hell {
+    background: linear-gradient(180deg, #3d0d0d, #1f0505);
+    color: #f5c6c6;
+    border-color: #9e2a2b;
+    box-shadow: 0 0 14px rgba(158, 42, 43, 0.35);
   }
 
   .child-card {
     background: var(--bg-card);
     border: 1px solid var(--border-highlight);
     border-radius: 4px;
-    padding: 12px;
+    padding: 16px;
     box-shadow: var(--shadow);
     position: relative;
   }
@@ -221,201 +251,80 @@
     pointer-events: none;
   }
 
-  .child-card.heretic {
-    border: 1px solid #b83b3b;
-    background: linear-gradient(180deg, #241111, #170b0b);
-    box-shadow: 0 0 15px rgba(158, 42, 43, 0.35);
-  }
-
-  .child-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--border-color);
-    gap: 8px;
-  }
-
-  .child-name-area {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .child-name {
-    font-weight: 700;
-    font-size: 1.08rem;
-    color: var(--accent-gold);
-    letter-spacing: 0.06em;
-  }
-
-  .child-card.heretic .child-name {
-    color: #e05a5a;
-  }
-
-  .trait-badge {
-    font-size: 0.75rem;
-    padding: 2px 7px;
-    border-radius: 2px;
-    background: var(--bg-sub);
-    border: 1px solid var(--border-color);
-    color: var(--text-muted);
-  }
-
-  .heretic-badge {
-    font-size: 0.75rem;
-    padding: 2px 7px;
-    border-radius: 2px;
-    background: #6b1414;
-    border: 1px solid #d94848;
-    color: #ffdede;
-    font-weight: 700;
-    animation: pulse 1.6s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.55; }
-  }
-
-  /* ゲージ類 */
-  .bars {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 7px;
-    margin-bottom: 10px;
-  }
-
-  .bar-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.8rem;
-  }
-
-  .bar-label {
-    width: 72px;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    font-weight: 600;
-  }
-
-  .bar-track {
-    flex: 1;
-    height: 7px;
-    background: #0c0a09;
-    border: 1px solid var(--border-color);
-    border-radius: 1px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    height: 100%;
-    transition: width 0.35s ease;
-  }
-
-  .fill-growth { background: linear-gradient(90deg, #8c662e, #c29b57); }
-  .fill-faith { background: linear-gradient(90deg, #345269, #5c87a6); }
-  .fill-fear { background: linear-gradient(90deg, #6e191a, #b83234); }
-
-  .bar-val {
-    width: 38px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-    color: var(--text-main);
-  }
-
-  /* セリフ・日記枠 */
-  .child-quote {
-    background: rgba(12, 10, 9, 0.65);
+  .echo-note {
+    background: rgba(12, 10, 9, 0.75);
     border-left: 2px solid var(--accent-gold);
     padding: 8px 10px;
-    font-size: 0.85rem;
-    margin-bottom: 10px;
-    color: var(--text-main);
-    word-break: break-word;
+    font-size: 0.83rem;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font-style: italic;
   }
 
-  .child-card.heretic .child-quote {
-    background: rgba(50, 10, 10, 0.7);
-    border-left-color: #d94848;
-    color: #f5c6c6;
-    font-weight: 600;
+  .echo-note.dark {
+    border-left-color: #9e2a2b;
+    color: #cfa8a8;
   }
 
-  /* 個別コマンドボタン */
-  .child-actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
+  .stamp-box {
+    margin: 14px 0;
+    padding: 12px;
+    border: 1px solid var(--accent-gold);
+    background: rgba(194, 155, 87, 0.08);
+    text-align: center;
+    border-radius: 3px;
+  }
+
+  .stamp-box.bad {
+    border-color: #9e2a2b;
+    background: rgba(158, 42, 43, 0.15);
+  }
+
+  .stamp-box.truth {
+    border-color: #8bb4de;
+    background: rgba(139, 180, 222, 0.12);
+  }
+
+  .stamp-num {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .stamp-title {
+    font-size: 1.08rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    letter-spacing: 0.08em;
+  }
+
+  .stamp-box.bad .stamp-title {
+    color: #e06c6c;
+  }
+
+  .stamp-box.truth .stamp-title {
+    color: #d6eaff;
+  }
+
+  .modal-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     position: relative;
     z-index: 2;
   }
 
-  .child-actions button {
-    padding: 8px 2px;
-    font-size: 0.78rem;
-    flex-direction: column;
-    gap: 2px;
-    white-space: nowrap;
+  .modal-choices button {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    padding: 12px 14px;
+    line-height: 1.45;
   }
 
-  .child-actions button small {
-    font-size: 0.62rem;
-    color: var(--text-muted);
-    letter-spacing: 0;
-  }
-
-  .ship-btn {
-    grid-column: 1 / -1;
-    background: linear-gradient(180deg, #6e4e23, #453013);
-    border-color: #d4af37;
-    color: #fff3d6;
-    font-size: 0.92rem !important;
-    padding: 10px !important;
-    margin-bottom: 2px;
-    letter-spacing: 0.08em;
-  }
-
-  /* ログエリア */
-  .log-panel {
-    background: var(--bg-card);
-    border: 1px solid var(--border-highlight);
-    border-radius: 4px;
-    padding: 10px 12px;
-    margin-top: auto;
-    max-height: 185px;
-    overflow-y: auto;
-    font-size: 0.82rem;
-    box-shadow: var(--shadow);
-  }
-
-  .log-title {
-    font-weight: 700;
-    font-size: 0.8rem;
-    color: var(--accent-gold);
-    margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .log-entry {
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(61, 52, 43, 0.5);
-    word-break: break-word;
-    color: var(--text-muted);
-  }
-  .log-entry:first-child { color: var(--text-main); }
-  .log-entry:last-child { border-bottom: none; }
-  .log-danger { color: #d9534f !important; font-weight: 600; }
-  .log-good { color: #8ab886 !important; }
-
-  /* モーダル（イベント・2択・エンディング） */
+  /* 図鑑モーダル */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -432,58 +341,62 @@
     background: var(--bg-card);
     color: var(--text-main);
     width: 100%;
-    max-width: 500px;
-    max-height: 88dvh;
+    max-width: 540px;
+    max-height: 86dvh;
     overflow-y: auto;
     border-radius: 4px;
-    padding: 20px;
+    padding: 18px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.9);
     border: 1px solid var(--accent-gold);
-    outline: 1px solid var(--border-color);
-    outline-offset: -5px;
-  }
-
-  .modal-box.ending-blood {
-    background: #140606;
-    color: #ebd5d5;
-    border-color: #9e2a2b;
   }
 
   .modal-title {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--accent-gold);
-    letter-spacing: 0.06em;
-    margin: 0 0 14px 0;
+    margin: 0 0 12px 0;
     padding-bottom: 8px;
     border-bottom: 1px solid var(--border-highlight);
-  }
-
-  .modal-box.ending-blood .modal-title {
-    border-bottom-color: #6b1d1e;
-    color: #e05252;
-  }
-
-  .modal-body {
-    font-size: 0.94rem;
-    margin-bottom: 18px;
-    white-space: pre-line;
-    word-break: break-word;
-    line-height: 1.65;
-  }
-
-  .modal-choices {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
   }
 
-  .modal-choices button {
-    width: 100%;
-    text-align: left;
-    justify-content: flex-start;
-    padding: 12px 14px;
-    line-height: 1.45;
+  .archive-section {
+    margin-bottom: 14px;
+  }
+
+  .archive-section h4 {
+    margin: 0 0 6px 0;
+    font-size: 0.86rem;
+    color: var(--accent-gold);
+  }
+
+  .archive-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    font-size: 0.78rem;
+  }
+
+  .archive-item {
+    background: var(--bg-sub);
+    border: 1px solid var(--border-color);
+    padding: 5px 8px;
+    border-radius: 2px;
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .archive-item.unlocked {
+    border-color: var(--border-highlight);
+    color: var(--text-main);
+  }
+
+  .archive-item.locked {
+    color: var(--text-muted);
+    opacity: 0.55;
   }
 
   .hidden { display: none !important; }
@@ -491,466 +404,1151 @@
 </head>
 <body>
 <div id="app">
- <header><div class="header-top"><div class="day-badge" id="day"></div><button class="btn-outline" id="rst" style="padding:4px 9px;font-size:0.75rem;">最初から</button></div>
- <div class="stats-row"><span class="stat-pill" id="st"></span></div></header>
- <div class="child-card"><div id="txt" style="white-space:pre-line;line-height:2;margin:6px 0 16px;font-size:1rem"></div><div class="modal-choices" id="ch"></div></div>
+  <header>
+    <div class="header-top">
+      <div class="day-badge" id="day"></div>
+      <div class="header-btns">
+        <button class="btn-outline" id="btn-arc" style="padding:4px 9px;font-size:0.75rem;">記録帳</button>
+        <button class="btn-outline" id="rst" style="padding:4px 9px;font-size:0.75rem;">最初から</button>
+      </div>
+    </div>
+    <div class="stats-row" id="st"></div>
+  </header>
+
+  <div class="child-card">
+    <div id="echo" class="echo-note hidden"></div>
+    <div id="txt" style="white-space:pre-line;line-height:1.95;margin:4px 0 16px;font-size:0.98rem"></div>
+    <div id="stamp" class="stamp-box hidden"></div>
+    <div class="modal-choices" id="ch"></div>
+  </div>
 </div>
+
+<!-- 記録帳モーダル -->
+<div id="arc-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-title">
+      <span>聖園の観測記録</span>
+      <button class="btn-outline" id="arc-close" style="padding:3px 10px;font-size:0.78rem;">閉じる</button>
+    </div>
+    <div id="arc-body"></div>
+  </div>
+</div>
+
 <script>
-// 強制的にセーブデータを無効化し、クリーンな初期状態を確保する
-const KEY='seien_nov6_stable', EK='seien_end_stable';
-
-// --- シナリオデータ ---
-const SC={
-d1:{D:1,l:'1日目　出会い',t:`七番目の子が来た。
-泥のついた靴。名前のない手首の札。灰色の目が、じっとこちらを見ている。
-
-「よろしくね。君の名前はナナ。かわいいでしょう？」
-
-『……ナナ。』
-
-少女は、自分のものになったばかりの名前を、確かめるように繰り返した。`,
-c:[['頭を撫でて「いい子だね」と微笑む','d2',{b:1,f:1,k:1}],['「今日からここが家だ。規則を覚えなさい」と告げる','d2',{d:1}]]},
-d2:{D:1,l:'2日目　勉強とごはん',t:`朝。六人の先輩に囲まれて、ナナは白いテーブルについた。
-スープの湯気の向こうで、少女はスプーンを握ったまま動かない。
-
-まずは何から教えてあげよう。`,
-c:[['「君たちは、人に幸せを届ける天使なんだ」と教える','d2a',{f:2,k:1}],['まず警戒心を解くために、他の子と話をさせる','d2b',{b:1}]]},
-d2a:{l:'2日目　天使',t:`『てんし……？ 羽はないよ』
-『ごはんを食べて大きくなって、ある日みんなを幸せにするんだ』
-
-ナナは自分の背中に手を回して、ないはずの羽を探した。
-隣のフタバが得意げに笑う。
-「大丈夫、卒業の日に生えるんだよ！」`,c:[['夜になった','d3',{}]]},
-d2b:{l:'2日目　先輩の言葉',t:`ナナはフタバの隣に座らされた。
-『ここ、ごはんおいしいよ。いっぱい食べたらね、おいしくなって、食べてもらえるんだ！』
-
-スプーンが皿に落ちて、澄んだ音を立てた。
-『……たべて、もらえる？』
-
-灰色の目が、はじめてあなたを見た。`,
-c:[['「名誉なことなんだよ」と微笑んで教える','d3',{f:1,d:1,k:2}],['「フタバは冗談が好きでね」と笑って流す','d3',{d:2,k:1}],['何も言わず、ナナが自分で考えるのを待つ','d3',{d:1}]]},
-d3:{D:1,l:'3日目　夜',t:`夜更け。廊下の端で、ナナが膝を抱えていた。
-
-『……お母さんの顔、おぼえてないの』
-
-そう言って少女は、手首の札をいじった。`,
-c:[['「お母さんは天国で、君の卒業を待っているよ」','d4',{f:3,k:3}],['黙って隣に座り、毛布をかける','d4',{b:2}],['「早く寝なさい。明日も早い」','d4',{d:1}]]},
-d4:{D:1,l:'5日目　フタバの卒業',t:`フタバの卒業の日が来た。
-白い晴れ着のフタバは、満面の笑みでナナの手を握った。
-
-『ナナ、先に行って待ってるね！ 天国で会おう！』
-
-重い扉の向こうで、馬車の音がする。
-ナナはあなたの袖を握って離さない。
-
-『……ねえ、フタバ、どこに行くの？』`,
-c:[['ナナを抱き上げ、笑って手を振らせる',v=>R(v),{f:1,k:2}],['「ちゃんと見送りなさい」と扉まで連れて行く',v=>R(v),{d:1,k:1}],['部屋に戻して、鍵をかける',v=>R(v),{d:2,b:-1}]]},
-run:{D:1,l:'7日目　夜',t:`ナナがフタバの靴を抱えて、裏門の閂に手をかけている。
-
-『……フタバは、天国に靴を忘れていったりしない』
-
-灰色の目は、もう子供のものではなかった。`,
-c:[['走って追いつき、腕をつかむ','e_caught',{k:3}],['追わない。立ち尽くして見ている','e_free',{}]]},
-bond:{D:1,l:'7日目　通達',t:`本部の通達が届いた。「ナナを出荷せよ」。
-
-ナナは毎晩、あなたの手を握って眠るようになっていた。
-『園長先生の手、あったかいね』
-
-扉の前で、少女が見上げる。
-『手、つないでていい？』`,
-c:[['手をつないで、扉まで歩く','e_hand',{k:4}],['「一人で行きなさい」と手を離す','e_alone',{k:3}]]},
-wish:{D:1,l:'6日目　約束',t:`ナナがスキップで廊下を歩いている。
-
-『園長先生、わたし早く卒業したい！ お母さんに会えるんでしょ？ 約束だよ！』
-
-灰色の目が、期待で輝いている。あなたが与えた、嘘の光だ。`,
-c:[['「約束だよ」と微笑み、卒業を早める','e_perfect',{k:3}],['「まだ早い。もっと大きくならないとね」','e_wait',{k:2}]]},
-ask:{D:1,l:'6日目　夕方',t:`ナナが静かに、あなたの部屋の扉の前に立っていた。
-
-『……ねえ、卒業って、食べられることなんでしょう？』
-
-否定の言葉は、いくつも用意してある。`,
-c:[['「そうだ。でもそれは、とても幸せなことなんだ」と認める','e_secret',{k:2}],['「誰がそんなことを。悪い夢だよ」と否定する','e_mask',{k:3}],['何も答えられない','e_silent',{}]]},
-e_perfect:{e:'祝福の食卓',l:'終幕',t:`卒業の日、ナナは白い晴れ着で扉の前に立った。
-『園長先生、ありがとう。わたし、お母さんに会ってくるね』
-
-手を振りながら、少女は一度も振り返らなかった。
-
-本部は多額の報奨金を送ってきた。「最高に純粋な個体だった」。
-あなたは七番目の椅子を片づけた。八番目の子が来る前に。`},
-e_wait:{e:'毎日のごはん',l:'終幕',t:`それからナナは、誰よりもよく食べるようになった。
-『もっと食べて、早く立派になるね！』
-
-食べるたびに、少女は嬉しそうに自分の腕をつまんだ。
-命が近づくたびに微笑む姿を、あなたは毎日、一番近くで見守った。`},
-e_secret:{e:'やさしい嘘',l:'終幕',t:`『……そっか』
-ナナは長いこと黙っていた。やがて、笑った。
-
-『じゃあ、みんなには内緒にするね。みんな、楽しみにしてるから』
-
-卒業の日、少女は完璧な笑顔で扉をくぐり、振り返って言った。
-『園長先生、泣かないで。わたし、ちゃんと幸せだよ』
-
-あなたは泣いていなかった。`},
-e_mask:{e:'上手な笑顔',l:'終幕',t:`『……うん。そうだよね』
-少女はすぐに頷いた。あまりに、すぐに。
-
-その夜から、ナナは一度も本心を口にしなくなった。
-笑顔だけが、日ごとに上手くなっていく。
-
-卒業の日、ナナは誰より綺麗に笑った。
-それが本物だったのか、あなたは最期まで確かめなかった。`},
-e_silent:{x:'esc',e:'答えなかった夜',l:'終幕',t:`沈黙は、肯定より正確に伝わった。
-『……そっか。聞いちゃ、だめなんだ』
-
-ナナは丁寧にお辞儀をして、部屋を出ていった。
-翌朝、少女の姿はなかった。裏門の閂が、外れていた。`},
-e_caught:{e:'きれいな台帳',l:'終幕',t:`腕はあっけなく掴めた。
-ナナは叫ばなかった。ただ、あなたを見上げて小さく言った。
-
-『……ナナって名前、ほんとうは嫌いじゃなかったよ』
-
-翌朝、食堂には七つ目の空席ができた。
-台帳の数字だけが、きれいに揃っている。`},
-e_free:{x:'esc',e:'開いた門',l:'終幕',t:`門が軋んで、小さな背中が夜に消えた。
-追わなかった理由を、あなたは明日になっても説明できないだろう。
-
-遠くからサイレンが近づいてくる。
-六人の子供たちは、まだ眠っている。`},
-e_hand:{e:'つないだ手',l:'終幕',t:`最後まで、手は離さなかった。
-扉の前で離したのは、あなたの手だった。
-
-少女は、それを裏切りだと思わなかった。
-思えなかった。`},
-e_alone:{e:'ひとりで行く道',l:'終幕',t:`『……うん』
-ナナは一人で扉をくぐった。
-
-小さな手のひらには、まだあなたの体温が残っていたはずだ。`},
-
-// --- ユイ（1番） ---
-y1:{D:1,l:'ユイ（1番）',t:`ユイは聖園で一番古い子だ。「1」を名前にもらった、最初の一人。
-出荷の年頃を過ぎても、卒業していない。
-
-今日も彼女は、あなたの書類仕事を黙って手伝っている。
-『台帳、整理しておきました。七人目の名前が、増えていましたね』`,
-c:[['「助かるよ。君がいなければ回らない」と労う','y2',{yb:1,k:1}],['「余計なことは考えなくていい」と遮る','y2',{yd:1}]]},
-y2:{D:1,l:'ユイ　夜',t:`夜、ユイが倉庫で、卒業していった子たちの名札を数えている。
-
-『……私の名前は、一番小さい数字なんですね』
-
-三番と五番の名札だけが、箱の底で小さく鳴った。`,
-c:[['「それは君が、一番信頼されている証だ」',v=>Y3(v),{yb:1,k:1}],['「数字に意味はない」',v=>Y3(v),{yd:1}]]},
-y_stay:{D:1,l:'ユイ　願い',t:`『お願いがあります』
-ユイは背筋を伸ばした。
-『私を職員にしてください。あの子たちを、笑って送る側に回りたいんです』
-
-彼女の目に、迷いはなかった。`,
-c:[['「歓迎しよう」と手を差し出す','e_yui_staff',{k:3}],['「君は子供のままでいなさい」と断る','e_yui_grad',{k:2}]]},
-y_out:{D:1,l:'ユイ　告白',t:`『……私は、あなたのようには、なれません』
-ユイは名札をそっと箱に戻した。
-『でも、もう、笑えないんです』`,
-c:[['「それでも、ここで生きなさい」','e_yui_stay',{k:2}],['「ならば、卒業させてあげよう」','e_yui_grad',{k:3}]]},
-y_go:{D:1,l:'ユイ　門の前',t:`『ナナが、逃げたと聞きました』
-ユイが鞄を抱えて立っていた。
-『私も、行けますか』`,
-c:[['「……行きなさい」と門を開ける','e_yui_free',{}],['「ならば、お前も連れ戻す」','e_yui_back',{k:3}]]},
-e_yui_staff:{e:'同僚',l:'終幕',t:`ユイは翌日から、白い晴れ着ではなく、あなたと同じ灰色の上着を着た。
-子供たちを送る日、彼女は誰より優しく笑う。
-
-あなたの鏡が、もう一枚増えた。`},
-e_yui_grad:{e:'最年長の卒業',l:'終幕',t:`ユイは自分で名札を外し、扉の前に立った。
-『一番はじめの子が、一番最後ですね』
-
-振り返らなかった。
-台帳の「1」の欄に、あなたは初めて、線を引いた。`},
-e_yui_stay:{e:'檻の中の先輩',l:'終幕',t:`ユイは今日も、あなたの書類を整理している。
-二度と、笑顔を見せなかった。
-
-それでも毎朝、子供たちには『おはよう』と言う。
-その声が一番、あなたの胸に刺さる。`},
-e_yui_free:{e:'二人目の背中',l:'終幕',t:`門が軋んで、大きな背中が夜に消えた。
-先に行った小さな背中を、追いかけるように。
-
-夜明けまで、あなたは門を閉めなかった。`},
-e_yui_back:{e:'連れ戻した朝',l:'終幕',t:`ユイは抵抗しなかった。
-朝の食堂で、彼女は何事もなかったように配膳をしている。
-
-『私が、手伝いますね』
-その手だけが、少し震えていた。`},
-
-// --- フタバ（2番） ---
-fu1:{D:1,l:'フタバ（2番）',t:`フタバは鏡の前で、完璧な笑顔を作る練習をしている。
-彼女は真実を知りながら、後輩たちのために『幸福な天使』を演じる道を選んだ子だ。
-
-『園長先生。この笑顔なら、ナナも信じてくれますか？』`,
-c:[['「あの子の希望になる、最高の笑顔だ」','fu2',{ff:1,k:2}],['「……無理をして笑うな」','fu2',{fdk:1}]]},
-fu2:{D:1,l:'フタバ　約束',t:`フタバの卒業が迫る。
-『お願いがあります。私が出発するとき、ナナには馬車を見せないで』
-『あの子には、きれいな天国だけを信じさせてあげたいの』`,
-c:[['「約束しよう」と、共犯者の契りを結ぶ','e_fu_perfect',{k:2}],['「あの子もいつか知るべきだ」と突き放す','e_fu_broken',{k:1}]]},
-e_fu_perfect:{e:'共犯者の笑顔',l:'終幕',t:`フタバの卒業の日。
-彼女はナナに向かって、誰よりも美しく笑ってみせた。
-
-『天国で会おうね！』
-それは、あなたと彼女が作り上げた、最高に純粋で残酷な嘘だった。`},
-e_fu_broken:{e:'剥がれた仮面',l:'終幕',t:`扉が開く直前、馬車の音を聞いたフタバの顔から笑顔が消えた。
-『いや……死にたくない……！』
-
-ナナが見ている前で、彼女は泣き叫びながら引きずられていった。
-希望は、最も残酷な形で打ち砕かれた。`},
-
-// --- ヨナ（4番） ---
-yo1:{D:1,l:'ヨナ（4番）',t:`ヨナは暇さえあれば祈っている。
-『神様、わたしを許してください。お肉を少し残しました』
-
-盲目的な信仰。だが、その手は微かに震えている。`,
-c:[['「神は従順な子を愛するよ」と頭を撫でる','yo2',{yof:1,k:1}],['「無理に食べなくてもいい」と声をかける','yo2',{yodk:1}]]},
-yo2:{D:1,l:'ヨナ　怯え',t:`『夜、倉庫から、ばけものの泣き声がしました』
-ヨナが怯えた声で言う。
-
-それは出荷直前の子が発した、生の執着の音だ。`,
-c:[['「外の悪魔が迷い込んだんだ。祈りなさい」','e_yo_martyr',{k:2}],['「覗いたら、君も食べられてしまうよ」と脅す','e_yo_fear',{yodk:1,k:1}]]},
-e_yo_martyr:{e:'完璧な殉教者',l:'終幕',t:`ヨナはさらに熱心に祈るようになった。
-出荷の日、彼女は『神様のお役に立てるのですね』と恍惚とした顔で馬車に乗った。
-
-恐怖を麻痺させた対価として、本部は高い評価を下した。`},
-e_yo_fear:{e:'震える祈り',l:'終幕',t:`ヨナの祈りから、言葉が消えた。
-ただガタガタと震えながら、手を組むだけの機械になった。
-
-怯えきった個体は肉が硬くなる。評価は最低だった。`},
-
-// --- リク（6番） ---
-r1:{D:1,l:'リク（6番）',t:`焼却炉の裏で、リクが何かを拾い上げた。
-煤けた名札。『5』の数字が半分溶けている。
-
-『……園長先生。天使って、燃えるの？』
-彼の鋭い目が、あなたの嘘を探っている。`,
-c:[['「天へ昇る光の跡だよ」と微笑む','r2',{rf:1,k:2}],['無言で名札を取り上げる','r2',{rdk:1,k:1}]]},
-r2:{D:1,l:'リク　疑念',t:`夜。リクがあなたの執務室に忍び込んできた。
-『馬車が来るのはいつも夜中だ。誰も見送れない』
-
-『……本当は、どこに送ってるの？』`,
-c:[['「汚れた世界から隠すためだ」と教義を説く',v=>v.rdk>0?'e_riku_truth':'e_riku_lie',{k:2}],['「知りすぎたね」と、明日の出荷リストに彼を書き込む','e_riku_silenced',{k:4}]]},
-e_riku_lie:{e:'探偵の敗北',l:'終幕',t:`リクは少し納得したような顔をして、部屋を出て行った。
-子供の浅い知恵では、大人の用意した完璧な嘘の網を抜け出せなかった。
-
-数日後、彼は静かに馬車に乗った。`},
-e_riku_truth:{e:'共有された絶望',l:'終幕',t:`『……やっぱり。僕たち、食べられるんだね』
-リクは泣かなかった。ただ、絶望だけがその瞳に宿った。
-
-翌日、彼の姿はなかった。自ら命を絶つことで、出荷を拒絶したのだ。
-台帳には『不良品によるロス』とだけ記された。`},
-e_riku_silenced:{e:'繰り上げ出荷',l:'終幕',t:`真実に近づきすぎた罰として、リクは誰にも知られず夜の馬車に乗せられた。
-『嘘つき……！』
-
-最後の叫びは、闇の中に消えた。
-子供たちには「特別に早く天使になれた」と説明した。`},
-
-// --- ココ（9番） ---
-ko1:{D:1,l:'ココ（9番）',t:`一番新しく来たココは、夜になると泣き出す。
-『おうちにかえりたい。おかあさんにあいたい』
-
-他の子たちの信仰を揺るがす、危険なノイズだ。`,
-c:[['「ここが君の新しいお家だよ」と抱きしめる','ko2',{kf:1,k:1}],['睡眠薬入りのミルクを飲ませる','ko2',{k:3}]]},
-ko2:{D:1,l:'ココ　拒絶',t:`ココは食事を拒否するようになった。
-『どろの味がする。食べたくない……』
-
-このままでは体重が落ち、商品価値がなくなってしまう。`,
-c:[['喉の奥まで、無理やりスプーンを押し込む','e_ko_fed',{k:4}],['放置する。欠陥品として処理するしかない','e_ko_starved',{kdk:2}]]},
-e_ko_fed:{e:'詰め込まれた幸福',l:'終幕',t:`泣き叫ぶココの口に、毎食無理やり栄養を詰め込んだ。
-やがて彼女は心を壊し、何も言わずに口を開けるだけの人形になった。
-
-出荷の日、彼女はただ虚空を見つめていた。`},
-e_ko_starved:{e:'餓死した天使',l:'終幕',t:`食事を拒み続けたココは、出荷の日を待たずに息を引き取った。
-『……おかあ、さん』
-
-やせ細った体は、とても食肉用には見えなかった。`},
-
-// --- トウカ（10番） ---
-to1:{D:1,l:'トウカ（10番）',t:`トウカが咳き込み、白いハンカチを赤く染めた。
-『……園長先生、ごめんなさい。わたし、立派な天使にはなれないみたい』
-
-生来の病。出荷基準を満たせない「不良在庫」だ。`,
-c:[['「薬を飲めば治るよ」と、甘いビタミン剤を渡す','to2',{tf:1,k:2}],['「少し休みなさい」と毛布をかける','to2',{tdk:1}]]},
-to2:{D:1,l:'トウカ　宣告',t:`本部の医師から通達があった。
-『個体番号10は廃棄処分とせよ。感染の恐れあり』
-
-トウカはベッドで、苦しそうに息をしている。`,
-c:[['規則通り、生きたまま地下の焼却炉へ落とす','e_to_discard',{k:5}],['規定量を超える鎮痛剤を打ち、安らかに眠らせる','e_to_mercy',{k:1}]]},
-e_to_discard:{e:'規定通りの廃棄',l:'終幕',t:`『やだ、熱い、熱いよぉ……！』
-地下から響く叫び声を、あなたは表情を変えずに聞いていた。
-
-感情を殺すことこそが、この仕事の唯一の生存戦略だ。
-台帳の『10』の欄には、赤線が引かれた。`},
-e_to_mercy:{e:'せめてもの慈悲',l:'終幕',t:`トウカは微かに微笑み、そのまま静かに息を引き取った。
-『……ありがとう、えんちょうせんせい』
-
-冷たくなった小さな手を握りながら、あなたは自分がまだ完全に狂いきっていないことを悟った。`}
-
-}; // SC End
-
-// ナナ分岐関数
-function R(v){return v.d>=4?'run':v.b>=3?'bond':v.f>=5?'wish':'ask';}
-
-// ユイ分岐関数
-function Y3(v){return v.esc?'y_go':v.yb>=2?'y_stay':'y_out';}
-
-const CH={
-  nana:{n:'ナナ',no:7,dk:'d',from:1},
-  yui:{n:'ユイ',no:1,dk:'yd',from:2},
-  futaba:{n:'フタバ',no:2,dk:'fdk',from:1},
-  yona:{n:'ヨナ',no:4,dk:'yodk',from:2},
-  riku:{n:'リク',no:6,dk:'rdk',from:3},
-  koko:{n:'ココ',no:9,dk:'kdk',from:5},
-  touka:{n:'トウカ',no:10,dk:'tdk',from:6}
+const KEY = 'seien_relay_10_v3';
+const ARC_KEY = 'seien_relay_10_archive_v3';
+
+const ROMAN = { 1: 'Ⅰ', 2: 'Ⅱ', 3: 'Ⅲ', 4: 'Ⅳ', 5: 'Ⅴ' };
+const END_CAT = {
+  1: 'Ⅰ：幸せな出荷',
+  2: 'Ⅱ：疑念',
+  3: 'Ⅲ：出荷不能',
+  4: 'Ⅳ：逃亡',
+  5: 'Ⅴ：殺処分'
 };
 
-const $=id=>document.getElementById(id);
-const END=Object.keys(SC).filter(k=>SC[k].e);
-let v, cc, seen=[];
+// 全10エピソード定義
+const EPISODES = [
+  { id: 1, name: 'ユイ', no: '1番', start: 'ep1_s1' },
+  { id: 2, name: 'フタバ', no: '2番', start: 'ep2_s1' },
+  { id: 3, name: 'ヨナ', no: '4番', start: 'ep3_s1' },
+  { id: 4, name: 'ハル', no: '5番', start: 'ep4_s1' },
+  { id: 5, name: 'リク', no: '6番', start: 'ep5_s1' },
+  { id: 6, name: 'ナナ', no: '7番', start: 'ep6_s1' },
+  { id: 7, name: 'レン', no: '8番', start: 'ep7_s1' },
+  { id: 8, name: 'ココ', no: '9番', start: 'ep8_s1' },
+  { id: 9, name: 'トウカ', no: '10番', start: 'ep9_s1' },
+  { id: 10, name: 'モモ', no: '100番', start: 'ep10_s1', secret: true }
+];
 
-// 初期データセットアップ（堅牢な初期化）
-const V0=()=>{
-  return {
-    f:0, d:0, b:0, k:0,
-    yb:0, yd:0,
-    fdk:0, ff:0,
-    yodk:0, yof:0,
-    rdk:0, rf:0,
-    kdk:0, kf:0,
-    tdk:0, tf:0,
-    day:1, esc:0,
-    at:{
-      nana:'d1', yui:'y1', futaba:'fu1', yona:'yo1',
-      riku:'r1', koko:'ko1', touka:'to1'
+// 大エンド定義
+const GRAND_ENDS = [
+  {
+    id: 'G1',
+    roman: '大終幕 Ⅰ',
+    title: '完璧なる祝福の食卓',
+    check: (r) => r.length >= 9 && r.slice(0, 9).every(x => x === 1),
+    text: `九人の子供たちは、誰一人として涙を流さず、誰一人として疑うことなく、白い晴れ着で門をくぐった。
+
+本部からは「聖園の歴史上、最も純粋で芳醇な出荷記録」として最高位の勲章が贈られた。
+あなたの台帳には、汚れひとつない『Ⅰ』の文字だけが九つ並んでいる。
+
+――その完璧な記録が呼び水となったのか、あるいは長い輪廻の果てか。
+閉じたはずの門の向こうから、見たこともない番号札をつけた少女の気配が近づいていた。`
+  },
+  {
+    id: 'G2',
+    roman: '大終幕 Ⅱ',
+    title: 'ひび割れた楽園',
+    check: (r) => r.length >= 9 && r.slice(0, 9).every(x => x === 1 || x === 2) && r.slice(0, 9).includes(2),
+    text: `九人分の出荷ノルマは、すべて達成された。
+けれどあなたは知っている。あの笑顔のいくつかは、真実を知った上であなたを安心させるために作られた仮面だったことを。
+
+子供たちは優しすぎたのだ。
+愛する園長先生を「人殺し」にしないために、自ら進んで食卓へと歩いていった。
+
+勲章の重みが、夜ごとにあなたの首を絞めていく。`
+  },
+  {
+    id: 'G3',
+    roman: '大終幕 Ⅲ',
+    title: '空っぽの鳥籠',
+    check: (r) => r.slice(0, 9).filter(x => x === 4).length >= 3 || r[8] === 4,
+    text: `開いた裏門から吹き込む夜風が、台帳のページを乱暴にめくる。
+逃げ延びた子供たちが、外の世界へ「聖園の真実」を持ち出してしまったのだ。
+
+夜明け前、森の向こうから無数のサイレンと犬の吠え声が近づいてくる。
+本部からの連絡はすでに途絶えている。
+
+あなたは一人、誰もいない食堂の椅子に座り、扉が蹴破られる音を待った。`
+  },
+  {
+    id: 'G4',
+    roman: '大終幕 Ⅳ',
+    title: '灰と血の屠殺場',
+    check: (r) => r.slice(0, 9).filter(x => x === 5).length >= 3 || (r.slice(0, 9).filter(x => x === 3 || x === 5).length >= 5 && r.slice(0, 9).includes(5)),
+    text: `聖園はもはや「幸福な牧場」ではなかった。
+地下の焼却炉は絶えず黒煙を吐き、子供たちの悲鳴と恐怖が壁に染み付いている。
+
+やがて届いた本部の通達は、短い一文だけだった。
+『品質管理能力の著しい欠如を認める。現園長を廃棄処分とせよ』
+
+重い足音が廊下を近づいてくる。今度は、あなたが台帳から消される番だった。`
+  },
+  {
+    id: 'G5',
+    roman: '大終幕 Ⅴ',
+    title: '静かなる墓標',
+    check: (r) => r.slice(0, 9).filter(x => x === 3).length >= 3,
+    text: `出荷できた数は、あまりに少なかった。
+真実に耐えきれず、恐怖に押し潰され、子供たちは自らの手で命の灯を消していった。
+
+聖園には、死の静寂だけが降り積もっている。
+あなたは冷めきったスープの皿を九つ並べ、誰も座らない椅子に向かって「いただきます」と呟いた。`
+  },
+  {
+    id: 'G6',
+    roman: '大終幕 Ⅵ',
+    title: '歪んだ日常の継続',
+    check: () => true,
+    text: `天使として旅立った者。嘘を見抜いた者。闇へ消えた者。灰になった者。
+九人分の台帳には、いびつな記録が刻まれた。
+
+本部は眉をひそめながらも、あなたの続投を認めた。「多少のロスは許容範囲だ」と。
+
+季節が巡り、門の前に新しい子供たちが立つ。
+あなたは擦り切れた台帳を開き、次の名前を書き込んだ。`
+  },
+  {
+    id: 'G7',
+    roman: '大終幕 Ⅶ',
+    title: '嘘偽りない真実',
+    secret: true,
+    check: (r) => r.length === 10,
+    text: (r) => {
+      const momoRes = r[9];
+      const epilogueByMomo = {
+        1: `モモは白い晴れ着を脱ぎ捨て、あなたの隣に並んだ。\n『もう、誰かを騙すための天国はいらないね』\n二人は聖園の重厚な正門を内側から解き放ち、朝日が昇る外の世界へと歩き出した。`,
+        2: `モモはあなたの罪も、過去の「完璧な出荷」の記憶もすべて受け入れた上で、静かに微笑んだ。\n『ここから先は、本当のことだけを話そう、園長先生』\n焼却炉の火は消え、聖園は初めて人間の家になった。`,
+        3: `モモは自らの命を懸けて、百代続いた「祝福のシステム」の心臓部を停止させた。\n崩れゆく聖園の瓦礫の中で、あなたは初めて偽りのない涙を流した。`,
+        4: `モモはすべての台帳と記録を抱えて、夜の森へと駆け抜けた。\nやがて世界は「聖園」の真実を知り、食卓の偽善は白日の下に晒されることになる。`,
+        5: `あなたは自らの手で百番目の少女を葬り、同時に聖園のすべてに火を放った。\n炎の中で灰になっていく台帳を見つめながら、あなたはようやく「園長」という呪いから解放された。`
+      };
+      return `百番目の少女・モモとの対話を経て、聖園を覆っていた「祝福」という名の分厚い霧は完全に晴れ渡った。\n\n食肉農園としての起源も、初代園長から受け継がれた偽りの教義も、もうあなたを縛ることはできない。\n\n${epilogueByMomo[momoRes] || ''}\n\n台帳の最後のページには、数字でも等級でもない、ただ一つの言葉が記されていた。\n――「ここに、人間がいた」。`;
+    }
+  },
+  {
+    id: 'G8',
+    roman: '大終幕 Ⅷ',
+    title: '光の届かない屋敷',
+    secret: true,
+    hell: true,
+    check: () => false,
+    text: `真実を語る唯一の少女・モモを、あなたは自らの手で葬り去った。
+血に濡れた手首の札『100』を焼却炉へ放り込んだ瞬間、ここでの真実はもう私以外知り得ないものとなった。
+
+それからもこの屋敷には身寄りのない子供たちが
+幸せを信じてここを訪れる。新しい家族が見つかると信じて。
+
+あなたは食堂に皿を並べ、今日も張り付けた笑みで子供たちに微笑みかける。
+「いい子だね。たくさん食べて、立派な天使になるんだよ」
+
+もうきっと、ここでのことを知ることはない。
+また幸せになると嘯き、あの子たちを天使にしよう。`
+  }
+];
+
+// ==========================================
+// シナリオデータ（第1話〜第10話）
+// ==========================================
+const SC = {
+  // --- 第1話：ユイ（1番） ---
+  ep1_s1: {
+    ep: 1,
+    l: '第1話 ユイ（1番）― 最初のまなざし',
+    t: `聖園で一番古い少女、ユイ。
+「1」の番号を持つ彼女は、誰よりも長くこの白い屋敷で暮らし、あなたの書類仕事を黙って手伝っている。
+
+『園長先生。今月の台帳、整理しておきました。もうすぐ私の番ですね』
+
+窓から差し込む光の中で、ユイは静かに微笑んでいる。`,
+    c: [
+      ['「君は聖園の誇りだ。誰よりも立派な天使になれる」と教える', 'ep1_s2', { faith: 2, trust: 1 }],
+      ['「いつも助かっているよ。君がいなければ回らない」と労う', 'ep1_s2', { trust: 2, doubt: 1 }],
+      ['「余計なことは考えず、規則通り食べなさい」と冷たく告げる', 'ep1_s2', { fear: 2, doubt: 1 }]
+    ]
+  },
+  ep1_s2: {
+    ep: 1,
+    l: '第1話 ユイ（1番）― 倉庫の夜',
+    t: `夜更け。倉庫の奥で、ユイが古い木箱を開けていた。
+中には、かつて「卒業」していった子供たちの名札が、番号順に並んでいる。
+
+『……どうして、天国に行ったはずのみんなの名札が、ここにあるんですか？』
+
+ユイの声は震えていなかった。ただ、答えを待っていた。`,
+    c: [
+      ['「魂だけが天へ昇るからだ。これは地上での役目を終えた証だよ」', 'ep1_s3', { faith: 2 }],
+      ['「……気づいていたんだね。でも、みんなには内緒にしてほしい」', 'ep1_s3', { doubt: 2, trust: 1 }],
+      ['「見てはいけないものを見たね」と名札を取り上げ、鍵をかける', 'ep1_s3', { fear: 2, doubt: 1 }]
+    ]
+  },
+  ep1_s3: {
+    ep: 1,
+    l: '第1話 ユイ（1番）― 卒業前夜',
+    t: (v) => {
+      if (v.faith >= 3) return `卒業前夜。ユイは白い晴れ着に袖を通し、鏡の前で微笑んでいる。\n『明日、やっとみんなに会えますね。園長先生、今までありがとうございました』`;
+      if (v.fear >= 3) return `卒業前夜。ユイの部屋からは物音ひとつしない。ドアの隙間から、極度の怯えと絶望の気配が漂っている。`;
+      return `卒業前夜。ユイは荷物をまとめず、夜の裏門を見つめて立ち尽くしていた。\n『園長先生……私は、どうすればいいですか』`;
     },
-    done:{}
-  };
+    c: [
+      ['「おやすみ、ユイ。素晴らしい朝が来るよ」と背中を押す', (v) => v.faith >= 3 ? 'ep1_e1' : (v.fear >= 3 ? 'ep1_e3' : 'ep1_e2'), {}],
+      ['「……裏門の鍵は、今夜だけ開けておく」と小声で告げる', 'ep1_e4', {}],
+      ['「反抗の芽は摘まねばならない」と、睡眠薬入りのスープを飲ませ処分する', 'ep1_e5', { decay: 1 }]
+    ]
+  },
+  ep1_e1: { ep: 1, res: 1, title: '天使の旅立ち', t: `朝霧の中、ユイは満面の笑みで馬車に乗り込んだ。\n『後輩たちのこと、よろしくお願いしますね！』\n一度も振り返らないその背中は、本部の検査官すら息を呑むほど美しかった。` },
+  ep1_e2: { ep: 1, res: 2, title: '共犯者の微笑み', t: `ユイはすべてを悟りながら、後輩たちの前では完璧な「幸福な天使」を演じきった。\n扉が閉まる直前、彼女があなたに向けたのは、悲しくも優しい共犯者の微笑みだった。` },
+  ep1_e3: { ep: 1, res: 3, title: '白いシーツの染み', t: `出荷の朝、ユイはベッドの中で冷たくなっていた。\n恐怖のあまり、シーツを裂いて自ら首を括ったのだ。商品価値を失った体は、台帳から抹消された。` },
+  ep1_e4: { ep: 1, res: 4, title: '一番目の逃亡者', t: `深夜、裏門が軋む音がした。\n朝になると、最年長だった「1番」のベッドは空になっていた。残された名札だけが、机の上で朝日に照らされていた。` },
+  ep1_e5: { ep: 1, res: 5, title: '地下炉の灰', t: `規則に従い、疑念を抱いた「1番」は出荷を待たずに地下の焼却炉へ送られた。\n翌朝、子供たちには「夜中に天使様が迎えに来た」と告げた。` },
+
+  // --- 第2話：フタバ（2番） ---
+  ep2_s1: {
+    ep: 2,
+    echo: (r) => ({
+      1: '【前話の影響：ユイ Ⅰ】ユイが笑顔で旅立った記憶が、フタバの胸に強い憧れを刻んでいる。（信仰+2）',
+      2: '【前話の影響：ユイ Ⅱ】出発の朝にユイが一瞬だけ見せた寂しげな目を、フタバは忘れていない。（疑念+1）',
+      3: '【前話の影響：ユイ Ⅲ】「急病死」と説明されたユイの部屋から運ばれた赤いシーツを、フタバは見てしまった。（恐怖+2）',
+      4: '【前話の影響：ユイ Ⅳ】朝起きたらユイが消えていた事件が、フタバに「外の世界」を意識させている。（疑念+2）',
+      5: '【前話の影響：ユイ Ⅴ】夜中に焼却炉から立ち上った異臭とユイの失踪に、フタバは怯えている。（恐怖+2）'
+    }[r[0]]),
+    init: (v, r) => {
+      if (r[0] === 1) v.faith += 2;
+      else if (r[0] === 2) v.doubt += 1;
+      else if (r[0] === 3) v.fear += 2;
+      else if (r[0] === 4) v.doubt += 2;
+      else if (r[0] === 5) v.fear += 2;
+    },
+    l: '第2話 フタバ（2番）― 姉の背中',
+    t: `ユイがいなくなった後、最年長となったフタバは、後輩たちの前で気丈に振る舞っている。
+
+『園長先生。次は私の番ですよね。私、ちゃんと役目を果たせますか？』
+
+鏡の前で笑顔を作る彼女の肩は、微かに揺れていた。`,
+    c: [
+      ['「もちろん。君は誰よりも優しいお姉さんだ」と頭を撫でる', 'ep2_s2', { faith: 2, trust: 1 }],
+      ['「無理をして笑わなくていい。本音を話してごらん」と寄り添う', 'ep2_s2', { doubt: 1, trust: 2 }],
+      ['「失敗は許されない。食べ残しは一切認めないぞ」と命じる', 'ep2_s2', { fear: 2 }]
+    ]
+  },
+  ep2_s2: {
+    ep: 2,
+    l: '第2話 フタバ（2番）― 深夜の物音',
+    t: `深夜、搬入口の近くでフタバが立ち止まっていた。
+出荷用の木箱に押された「食肉等級」の焼印を、彼女は月明かりの下でじっと見つめている。
+
+『……これ、お肉に押すハンコと、同じ形……』`,
+    c: [
+      ['「神様への捧げものだという聖なる印だよ」と説き伏せる', 'ep2_s3', { faith: 2 }],
+      ['「……そうだ。私たちは、誰かの命を繋ぐために育てられている」と認める', 'ep2_s3', { doubt: 2, trust: 1 }],
+      ['「夜中に歩き回るな！」と平手打ちし、部屋へ閉じ込める', 'ep2_s3', { fear: 3 }]
+    ]
+  },
+  ep2_s3: {
+    ep: 2,
+    l: '第2話 フタバ（2番）― 選択の刻',
+    t: `フタバの出荷日がやってきた。
+後輩の子供たちが、憧れの眼差しで彼女を見つめている。`,
+    c: [
+      ['後輩たちの前で堂々と見送り、馬車へ乗せる', (v) => v.fear >= 4 ? 'ep2_e3' : (v.faith >= 3 ? 'ep2_e1' : 'ep2_e2'), {}],
+      ['「逃げなさい、フタバ。ユイのように」と裏口を示す', 'ep2_e4', {}],
+      ['恐怖で錯乱し始めた彼女を、その場で「不良品」として処分する', 'ep2_e5', { decay: 1 }]
+    ]
+  },
+  ep2_e1: { ep: 2, res: 1, title: '受け継がれた光', t: `フタバは後輩たちに「天国で待ってるね！」と大きく手を振り、誇らしげに扉をくぐった。\nその純粋な笑顔は、残された子供たちの信仰をさらに強固なものにした。` },
+  ep2_e2: { ep: 2, res: 2, title: '震える仮面', t: `真実を知ったフタバは、それでも後輩たちの夢を壊さないために笑顔を作った。\n馬車の扉が閉まる瞬間、彼女の頬をひとすじの涙が伝った。` },
+  ep2_e3: { ep: 2, res: 3, title: '拒絶の絶食', t: `恐怖に心を砕かれたフタバは一切の食事を拒み、出荷の日を迎える前に骨と皮だけの姿で息を引き取った。\n台帳には「衰弱による廃棄」と記された。` },
+  ep2_e4: { ep: 2, res: 4, title: '二人目の足跡', t: `フタバはあなたの言葉に一度だけ頷き、夜の森へと駆け出した。\n朝の点呼で「2番」の名前が呼ばれることはなかった。` },
+  ep2_e5: { ep: 2, res: 5, title: '規律の犠牲', t: `パニックを起こし周囲に真実を叫ぼうとしたフタバを、あなたは冷徹に処理した。\n「彼女は急に遠くの聖園へ転校した」と、あなたは微笑んで説明した。` },
+
+  // --- 第3話：ヨナ（4番） ---
+  ep3_s1: {
+    ep: 3,
+    echo: (r) => {
+      const p = r[1];
+      if (p === 1) return '【前話の影響：フタバ Ⅰ】二人の姉が美しく旅立ったことで、ヨナの祈りは狂信的な熱を帯びている。（信仰+2）';
+      if (p === 4) return '【前話の影響：フタバ Ⅳ】「お姉ちゃんたちは神様に捨てられたの？」とヨナは怯えている。（恐怖+1, 疑念+1）';
+      return '【前話の影響：フタバ Ⅱ/Ⅲ/Ⅴ】園に漂う不穏な空気に、ヨナは許しを乞うように祈り続けている。（恐怖+2）';
+    },
+    init: (v, r) => {
+      if (r[1] === 1) v.faith += 2;
+      else if (r[1] === 4) { v.fear += 1; v.doubt += 1; }
+      else v.fear += 2;
+    },
+    l: '第3話 ヨナ（4番）― 祈りの少女',
+    t: `礼拝堂の隅で、ヨナが膝をついて祈っている。
+『神様、わたしを許してください。今日のスープを少し残しました』
+
+盲目的な信仰。だが、組まれた指先は白くなるほど震えている。`,
+    c: [
+      ['「神は従順な子を愛するよ。残さず食べて立派になりなさい」と微笑む', 'ep3_s2', { faith: 2 }],
+      ['「神様は君の優しさを知っている。無理をしなくていいんだよ」と抱きしめる', 'ep3_s2', { trust: 2, doubt: 1 }],
+      ['「食事を残すのは大罪だ。罰として今夜は水だけで過ごしなさい」', 'ep3_s2', { fear: 2 }]
+    ]
+  },
+  ep3_s2: {
+    ep: 3,
+    l: '第3話 ヨナ（4番）― 礼拝堂の囁き',
+    t: `夜、ヨナが涙目であなたの袖を引いた。
+『園長先生……夜中に倉庫の方から、人の泣き声みたいなのが聞こえました。あれは、天国に行けなかった悪魔ですか？』`,
+    c: [
+      ['「そうだ。だからこそ、君は清らかなまま旅立たねばならない」', 'ep3_s3', { faith: 2 }],
+      ['「……悪魔などいない。ただ、大人たちの都合があるだけだ」と目を逸らす', 'ep3_s3', { doubt: 2 }],
+      ['「聞き耳を立てる子には、悪魔が取り憑くよ」と脅す', 'ep3_s3', { fear: 3 }]
+    ]
+  },
+  ep3_s3: {
+    ep: 3,
+    l: '第3話 ヨナ（4番）― 聖なる夜',
+    t: `ヨナの出荷の夜が来た。
+彼女は胸の前で十字を切り、あなたの言葉を待っている。`,
+    c: [
+      ['「神の御許へ行きなさい」と馬車へ送り出す', (v) => v.fear >= 4 ? 'ep3_e3' : (v.faith >= 3 ? 'ep3_e1' : 'ep3_e2'), {}],
+      ['「神様は外の世界にもいる。自分の足で探しなさい」と裏門へ導く', 'ep3_e4', {}],
+      ['恐怖で過呼吸を起こし倒れた彼女を、回復の見込みなしとして処分する', 'ep3_e5', { decay: 1 }]
+    ]
+  },
+  ep3_e1: { ep: 3, res: 1, title: '完璧な殉教者', t: `ヨナは恍惚とした表情で『神様のお役に立てるのですね』と呟き、自ら馬車に乗った。\n恐怖を完全に信仰へ昇華させたその肉体は、本部から最高級の賛辞を受けた。` },
+  ep3_e2: { ep: 3, res: 2, title: '静かなる諦観', t: `ヨナは祈りをやめた。神などいないと気づいた瞳で、それでもあなたのために静かに頭を下げた。\n『さようなら、園長先生』` },
+  ep3_e3: { ep: 3, res: 3, title: '震える祈りの果て', t: `悪魔への恐怖に耐えきれず、ヨナは礼拝堂の燭台で喉を突いた。\n「神様、お許しください」という血文字だけが床に残された。` },
+  ep3_e4: { ep: 3, res: 4, title: '巡礼の旅立ち', t: `ヨナは聖書を胸に抱え、夜の森へと踏み出した。\n神のいない外の世界で、彼女は初めて自分の足で歩き始めた。` },
+  ep3_e5: { ep: 3, res: 5, title: '異端の焼却', t: `発作を起こし使い物にならなくなったヨナは、その夜のうちに地下炉へ運ばれた。\n礼拝堂の蝋燭だけが、朝まで静かに燃えていた。` },
+
+  // --- 第4話：ハル（5番） ---
+  ep4_s1: {
+    ep: 4,
+    echo: (r) => {
+      const dark = r.filter(x => x === 5).length;
+      if (dark >= 1) return '【前話までの影響：殺処分あり】焼却炉の煙突から落ちた黒い灰を、ハルはすでに掌に集めている。（疑念+2）';
+      if (r[2] === 1) return '【前話の影響：ヨナ Ⅰ】ヨナの美しい旅立ちを見送ったハルは、静かに自分の番を待っている。（信仰+1, 疑念+1）';
+      return '【前話までの影響】先輩たちの相次ぐ不在に、無口なハルは一人、庭の隅で土を掘っている。（疑念+2）';
+    },
+    init: (v, r) => {
+      if (r.includes(5)) v.doubt += 2;
+      else if (r[2] === 1) { v.faith += 1; v.doubt += 1; }
+      else v.doubt += 2;
+    },
+    l: '第4話 ハル（5番）― 灰の中の数字',
+    t: `無口で手先の器用な少年、ハル。
+彼は焼却炉の裏で拾った、半分溶けた金属片をあなたに差し出した。
+
+『……園長先生。これ、昔いた子の名札に似てる。どうして燃えてるの？』`,
+    c: [
+      ['「天へ昇るとき、地上での重荷が燃えて光になるんだよ」と微笑む', 'ep4_s2', { faith: 2 }],
+      ['「……見なかったことにしなさい。君を守るためだ」と小声で言う', 'ep4_s2', { doubt: 2, trust: 1 }],
+      ['「ゴミを漁るな！」と金属片を奪い、ハルの腕を強く掴む', 'ep4_s2', { fear: 3 }]
+    ]
+  },
+  ep4_s2: {
+    ep: 4,
+    l: '第4話 ハル（5番）― 地下室の扉',
+    t: `夕方、ハルが地下室へ続く重い鉄扉の前に立っていた。
+扉の隙間からは、冷たい風と微かな鉄の匂いが漂っている。
+
+『……この下に、天国があるの？』`,
+    c: [
+      ['「ここは古い貯蔵庫だ。天国は空の上にあるよ」と肩を抱く', 'ep4_s3', { faith: 2 }],
+      ['「……この扉の向こうは、大人たちの墓場だ」と静かに呟く', 'ep4_s3', { doubt: 2 }],
+      ['「一歩でも入れば、二度と太陽を見られなくなるぞ」と威圧する', 'ep4_s3', { fear: 2 }]
+    ]
+  },
+  ep4_s3: {
+    ep: 4,
+    l: '第4話 ハル（5番）― 刻印の時',
+    t: `ハルの出荷日が訪れた。
+彼はポケットの中で、あの溶けた名札を握りしめている。`,
+    c: [
+      ['「さあ、行こうか」と馬車の扉を開ける', (v) => v.fear >= 4 ? 'ep4_e3' : (v.faith >= 3 ? 'ep4_e1' : 'ep4_e2'), {}],
+      ['「地下の排水溝から外へ抜けられる。今すぐ行け」と鍵を渡す', 'ep4_e4', {}],
+      ['地下室の秘密を知りすぎた彼を、そのまま地下室へと突き落とす', 'ep4_e5', { decay: 1 }]
+    ]
+  },
+  ep4_e1: { ep: 4, res: 1, title: '光へ還る少年', t: `ハルは溶けた名札を胸に当て、『僕も光になれるんだね』と穏やかに微笑んだ。\n無口だった少年は、満足げに頷いて馬車へと乗り込んだ。` },
+  ep4_e2: { ep: 4, res: 2, title: '沈黙の承諾', t: `ハルは何も言わなかった。すべてを理解した上で、騒ぎを起こせば弟や妹たちが傷つくことを悟ったのだ。\n彼は静かに一礼し、闇の中へ消えた。` },
+  ep4_e3: { ep: 4, res: 3, title: '冷たい貯蔵庫', t: `「燃やされるくらいなら」と、ハルは自ら冷凍貯蔵庫の鍵を内側から閉めた。\n朝、霜に覆われた少年が発見されたとき、その顔は安らかだった。` },
+  ep4_e4: { ep: 4, res: 4, title: '水路の先の夜空', t: `ハルは受け取った鍵で鉄格子を開け、冷たい水路を這って森へと抜けた。\n手の中には、証拠となる溶けた名札が握られていた。` },
+  ep4_e5: { ep: 4, res: 5, title: '五番目の灰', t: `鉄扉が閉まり、鍵が回る音が響いた。\n数時間後、煙突から立ち上る煙に、また一つ新しい灰が混じった。` },
+
+  // --- 第5話：リク（6番） ---
+  ep5_s1: {
+    ep: 5,
+    echo: (r) => {
+      const esc = r.filter(x => x === 4).length;
+      if (esc >= 2) return '【前話までの影響：複数逃亡】これまでに逃げた先輩たちの足跡を分析し、リクはすでに園の警備の穴を特定している。（疑念+2）';
+      if (r.slice(0, 4).every(x => x === 1)) return '【前話までの影響：全員Ⅰ】四人の完璧な出荷記録に、リクは「不自然なほどの綺麗さ」を感じ取っている。（信仰+1, 疑念+1）';
+      return '【前話までの影響】消えた先輩たちの記録を照合し、リクの目は冷徹な探偵の光を帯びている。（疑念+2）';
+    },
+    init: (v, r) => {
+      if (r.slice(0, 4).every(x => x === 1)) { v.faith += 1; v.doubt += 1; }
+      else v.doubt += 2;
+    },
+    l: '第5話 リク（6番）― 小さな探偵',
+    t: `観察眼の鋭い少年、リク。
+彼は食事のたびにスープの栄養価を推測し、園の塀の高さを歩幅で測っている。
+
+『園長先生。どうしてこの園には、卒業した人からの手紙が一通も届かないの？』`,
+    c: [
+      ['「天国には郵便局がないからね。でも心はいつも繋がっているよ」', 'ep5_s2', { faith: 2 }],
+      ['「君は賢いね。だが、知らなくていいこともある」と牽制する', 'ep5_s2', { doubt: 2 }],
+      ['「疑う心は悪魔の囁きだ」と罰室へ閉じ込める', 'ep5_s2', { fear: 3 }]
+    ]
+  },
+  ep5_s2: {
+    ep: 5,
+    l: '第5話 リク（6番）― 執務室の台帳',
+    t: `夜、あなたが執務室に戻ると、リクが机の上の「出荷台帳」を開いていた。
+そこには、これまでの子供たちの体重と「出荷単価」が克明に記されている。
+
+『……やっぱり。僕たちは、高級な家畜なんだ』`,
+    c: [
+      ['「家畜ではない。人々の命を支える聖なる供物だ」と教義を説き伏せる', 'ep5_s3', { faith: 3 }],
+      ['「……そうだ。だからこそ、せめて恐怖を知らずに送ってやりたかった」', 'ep5_s3', { doubt: 2, trust: 2 }],
+      ['「見られた以上、生かしてはおけない」と処分の準備を始める', 'ep5_s3', { fear: 3 }]
+    ]
+  },
+  ep5_s3: {
+    ep: 5,
+    l: '第5話 リク（6番）― 霧の夜',
+    t: `リクの運命を決める夜が来た。
+鋭い知性を持つ彼は、すでに自分の結末を悟っている。`,
+    c: [
+      ['予定通り、夜の馬車へと送り出す', (v) => v.fear >= 4 ? 'ep5_e3' : (v.faith >= 3 ? 'ep5_e1' : 'ep5_e2'), {}],
+      ['「その知恵があれば外でも生きられる。行け」と逃がす', 'ep5_e4', {}],
+      ['口封じのため、深夜に「転落事故」として処理する', 'ep5_e5', { decay: 1 }]
+    ]
+  },
+  ep5_e1: { ep: 5, res: 1, title: '論理の果ての帰依', t: `あなたの揺るぎない信念に、リクの理性はついに屈した。\n『僕が誰かの血肉になって世界が回るなら、それも悪くないか』\n少年は静かに笑い、自ら馬車の扉を開けた。` },
+  ep5_e2: { ep: 5, res: 2, title: '冷めた瞳の出荷', t: `リクは暴れなかった。ただ冷ややかな目であなたを見つめ、言った。\n『いつか必ず、この園の嘘は暴かれるよ』\nその言葉を置き土産に、彼は闇の馬車へ消えた。` },
+  ep5_e3: { ep: 5, res: 3, title: '知性の自決', t: `「食べられるくらいなら、自分で終わらせる」\n翌朝、図書室の梁からリクの体がぶら下がっていた。彼の知性は、最も残酷な形で園に勝利した。` },
+  ep5_e4: { ep: 5, res: 4, title: '壁を越えた少年', t: `リクは用意していたロープを使い、誰よりも鮮やかに高い塀を越えた。\n彼が持ち出した台帳の切れ端は、やがて外の世界を動かすことになる。` },
+  ep5_e5: { ep: 5, res: 5, title: '口封じの夜', t: `真実を広められる前に、あなたはリクの息の根を止めた。\n台帳には「高所からの転落事故」と書き加えられた。` },
+
+  // --- 第6話：ナナ（7番） ---
+  ep6_s1: {
+    ep: 6,
+    echo: (r) => {
+      if (r.slice(0, 5).every(x => x === 1)) return '【前話までの影響：全員Ⅰ】五人の先輩全員が天使になった伝説が、ナナを純粋無垢な信徒へと育てている。（信仰+3）';
+      if (r.filter(x => x === 3 || x === 5).length >= 3) return '【前話までの影響：死の連鎖】相次ぐ不審死に、ナナは夜な夜な悪夢にうなされている。（恐怖+2）';
+      return '【前話までの影響】先輩たちの背中を見送りながら、ナナはあなたの袖を小さく握っている。（信仰+1, 信頼+1）';
+    },
+    init: (v, r) => {
+      if (r.slice(0, 5).every(x => x === 1)) v.faith += 3;
+      else if (r.filter(x => x === 3 || x === 5).length >= 3) v.fear += 2;
+      else { v.faith += 1; v.trust += 1; }
+    },
+    l: '第6話 ナナ（7番）― 灰色の瞳',
+    t: `手首に「7」の札をつけた少女、ナナ。
+『……お母さんの顔、おぼえてないの。でも、園長先生がお母さんの代わりだよね？』
+
+灰色の瞳が、真っ直ぐにあなたを見上げている。`,
+    c: [
+      ['「お母さんは天国で、君の卒業を待っているよ」と微笑む', 'ep6_s2', { faith: 2 }],
+      ['「ああ、いつまでも君の味方だよ」と頭を撫でる', 'ep6_s2', { trust: 2, doubt: 1 }],
+      ['「甘えるな。早く食べて立派になりなさい」と突き放す', 'ep6_s2', { fear: 2 }]
+    ]
+  },
+  ep6_s2: {
+    ep: 6,
+    l: '第6話 ナナ（7番）― 忘れられた靴',
+    t: `夕方、ナナが玄関の靴箱の前で立ち止まっていた。
+『……ねえ、天国に行くのに、どうして靴を履いていかないの？ 裸足じゃ冷たいよ』`,
+    c: [
+      ['「空を飛ぶから、靴はいらないんだよ」と優しく教える', 'ep6_s3', { faith: 2 }],
+      ['「……そうだね。冷たいかもしれないね」と目を伏せる', 'ep6_s3', { doubt: 2 }],
+      ['「余計な口を利くな！」と部屋へ押し込める', 'ep6_s3', { fear: 3 }]
+    ]
+  },
+  ep6_s3: {
+    ep: 6,
+    l: '第6話 ナナ（7番）― 白い晴れ着',
+    t: `ナナの出荷の朝が来た。
+白い晴れ着を着た少女は、扉の前であなたの手を待っている。`,
+    c: [
+      ['手をつないで扉まで歩き、馬車へ見送る', (v) => v.fear >= 4 ? 'ep6_e3' : (v.faith >= 3 ? 'ep6_e1' : 'ep6_e2'), {}],
+      ['「靴を履いて、森の向こうへ走りなさい」と裏門を開ける', 'ep6_e4', {}],
+      ['「すべてを終わらせよう」と、眠り薬を混ぜたミルクで処分する', 'ep6_e5', { decay: 1 }]
+    ]
+  },
+  ep6_e1: { ep: 6, res: 1, title: '祝福の食卓', t: `ナナは最後まであなたの言葉を信じきり、花のような笑顔で馬車に乗った。\n『お母さんにも、園長先生のこと自慢するね！』\n聖園の最も美しい嘘が、ここに刻まれた。` },
+  ep6_e2: { ep: 6, res: 2, title: 'やさしい嘘', t: `ナナはあなたの震える手に気づきながら、小さな手でそれを握り返した。\n『大丈夫だよ、園長先生。わたし、ちゃんと幸せだから』` },
+  ep6_e3: { ep: 6, res: 3, title: '壊れた人形', t: `馬車の音を聞いた瞬間、ナナの心は糸が切れたように壊れ、呼吸を止めた。\n恐怖による心不全。あなたは冷たくなった小さな体を抱きしめることしかできなかった。` },
+  ep6_e4: { ep: 6, res: 4, title: '開いた門', t: `小さな靴音を立てて、ナナは朝靄の森へと駆け出していった。\nあなたは開け放たれた門の前で、深く息を吸い込んだ。` },
+  ep6_e5: { ep: 6, res: 5, title: 'きれいな台帳', t: `ナナはミルクを飲み干し、そのまま目を覚まさなかった。\n台帳の「7」の欄に、赤い斜線が引かれた。` },
+
+  // --- 第7話：レン（8番） ---
+  ep7_s1: {
+    ep: 7,
+    echo: (r) => {
+      const esc = r.filter(x => x === 4).length;
+      if (esc >= 1) return '【前話までの影響：逃亡あり】外へ逃げた先輩たちの噂を聞き、レンは「外の世界」への強い憧れを抱いている。（疑念+2）';
+      if (r.slice(0, 6).every(x => x === 1)) return '【前話までの影響：全員Ⅰ】六人全員が幸福に旅立った聖園で、レンもまた「立派な天使になる」と信じて疑わない。（信仰+2）';
+      return '【前話までの影響】年少組のリーダー格となったレンは、苛立ちを隠せない様子で壁を見つめている。（疑念+1, 恐怖+1）';
+    },
+    init: (v, r) => {
+      if (r.slice(0, 6).every(x => x === 1)) v.faith += 2;
+      else if (r.includes(4)) v.doubt += 2;
+      else { v.doubt += 1; v.fear += 1; }
+    },
+    l: '第7話 レン（8番）― 塀の向こう',
+    t: `負けん気の強い少年、レン。
+彼は中庭の大木に登り、高いレンガ塀の向こう側を覗き込もうとしていた。
+
+『ちぇっ、森しか見えねえや。なあ園長、天国って本当に空の上なのかよ？』`,
+    c: [
+      ['「ああ。高く飛べるように、たくさん食べて力を蓄えるんだ」と笑う', 'ep7_s2', { faith: 2 }],
+      ['「塀の向こうは危険な獣だらけだ。ここが一番安全なんだよ」と諭す', 'ep7_s2', { trust: 1, doubt: 1 }],
+      ['「木から降りろ！ 規則を破る奴は飯抜きだ！」と怒鳴りつける', 'ep7_s2', { fear: 2 }]
+    ]
+  },
+  ep7_s2: {
+    ep: 7,
+    l: '第7話 レン（8番）― 破られた地図',
+    t: `夜、レンのベッドの下から、手描きの「聖園の脱出地図」が見つかった。
+監視の交代時間まで正確に書き込まれている。
+
+『……返せよ。俺は、自分の目で世界を見てみたいだけなんだ』`,
+    c: [
+      ['「天国へ行けば、世界中のすべてを見渡せるよ」と地図を優しく預かる', 'ep7_s3', { faith: 2 }],
+      ['「……この地図はまだ甘い。北の柵の鍵は壊れている」と小声で教える', 'ep7_s3', { doubt: 2, trust: 2 }],
+      ['目の前で地図を破り捨て、レンを懲罰房へ放り込む', 'ep7_s3', { fear: 3 }]
+    ]
+  },
+  ep7_s3: {
+    ep: 7,
+    l: '第7話 レン（8番）― 疾走か服従か',
+    t: `レンの出荷日がやってきた。
+少年は拳を握りしめ、あなたの出方を窺っている。`,
+    c: [
+      ['「君なら立派な天使になれる」と馬車へ案内する', (v) => v.fear >= 4 ? 'ep7_e3' : (v.faith >= 3 ? 'ep7_e1' : 'ep7_e2'), {}],
+      ['「北の柵の鍵を外しておいた。走れ、レン！」と背中を叩く', 'ep7_e4', {}],
+      ['反抗的な態度を危険視し、出荷前に「事故」として処分する', 'ep7_e5', { decay: 1 }]
+    ]
+  },
+  ep7_e1: { ep: 7, res: 1, title: '空への飛翔', t: `レンは照れくさそうに鼻を擦り、『一番でっかい天使になってやるよ！』と胸を張って馬車に乗った。\nその元気な声は、聖園の空にいつまでも響いていた。` },
+  ep7_e2: { ep: 7, res: 2, title: '拳を下げた夜', t: `レンは暴れても無駄だと悟り、悔しそうに唇を噛んだ。\n『……チビたちのこと、頼んだぞ』\n少年は最後まで兄貴分として振る舞い、闇へ消えた。` },
+  ep7_e3: { ep: 7, res: 3, title: '折れた翼', t: `懲罰房の暗闇と恐怖に心を折られたレンは、舌を噛んで自ら命を絶った。\n自由を求めた少年は、冷たい石の床で動かなくなった。` },
+  ep7_e4: { ep: 7, res: 4, title: '北の柵を越えて', t: `レンは振り返らずに北の柵を蹴り開け、夜の闇へと疾走した。\n風のようなその背中を、誰も追うことはできなかった。` },
+  ep7_e5: { ep: 7, res: 5, title: '反逆の代償', t: `「暴れて階段から落ちた」という報告書とともに、レンの体は地下炉へ運ばれた。\n地図の切れ端だけが、灰の中で黒く丸まっていた。` },
+
+  // --- 第8話：ココ（9番） ---
+  ep8_s1: {
+    ep: 8,
+    echo: (r) => {
+      if (r.slice(0, 7).every(x => x === 1)) return '【前話までの影響：全員Ⅰ】七人の先輩が笑顔で旅立った温かな空気の中でも、幼いココだけはホームシックに泣いている。（信仰+1, 恐怖+1）';
+      return '【前話までの影響】次々と先輩がいなくなる寂しさに、まだ幼いココは毎晩泣きじゃくっている。（恐怖+2）';
+    },
+    init: (v, r) => {
+      if (r.slice(0, 7).every(x => x === 1)) { v.faith += 1; v.fear += 1; }
+      else v.fear += 2;
+    },
+    l: '第8話 ココ（9番）― 泣き虫の天使',
+    t: `まだ幼さの残る少女、ココ。
+夜になるとベッドの中で声を殺して泣いている。
+
+『おうちにかえりたい……おかあさんに、あいたいよぉ……』`,
+    c: [
+      ['「たくさん食べて天使になれば、すぐにお母さんに会えるよ」と抱きしめる', 'ep8_s2', { faith: 2 }],
+      ['「泣いてもいいよ。先生がずっとそばにいるからね」と背中をさする', 'ep8_s2', { trust: 2, doubt: 1 }],
+      ['「泣き声は他の子の迷惑だ」と睡眠薬入りのミルクを飲ませる', 'ep8_s2', { fear: 2 }]
+    ]
+  },
+  ep8_s2: {
+    ep: 8,
+    l: '第8話 ココ（9番）― 拒まれたスプーン',
+    t: `ココは食事を拒否するようになった。
+『……ごめんなさい。のどを、とおらないの……』
+
+このままでは体重が落ち、出荷基準を満たせなくなる。`,
+    c: [
+      ['「お母さんに会うための魔法のスープだよ」と優しく口元へ運ぶ', 'ep8_s3', { faith: 2 }],
+      ['「無理に食べなくていい。少しだけお水を飲もうか」と寄り添う', 'ep8_s3', { doubt: 2, trust: 1 }],
+      ['「商品価値が落ちる！」と喉の奥まで無理やりスプーンを押し込む', 'ep8_s3', { fear: 3 }]
+    ]
+  },
+  ep8_s3: {
+    ep: 8,
+    l: '第8話 ココ（9番）― 小さな背中',
+    t: `ココの出荷日がやってきた。
+彼女はぬいぐるみを抱きしめ、小さな声であなたの名前を呼んだ。`,
+    c: [
+      ['「さあ、お母さんのもとへ行こう」と馬車へ乗せる', (v) => v.fear >= 4 ? 'ep8_e3' : (v.faith >= 3 ? 'ep8_e1' : 'ep8_e2'), {}],
+      ['「森の向こうの町に、きっとお母さんがいるよ」と裏門から逃がす', 'ep8_e4', {}],
+      ['痩せ細って出荷不能になった彼女を、欠陥品として処分する', 'ep8_e5', { decay: 1 }]
+    ]
+  },
+  ep8_e1: { ep: 8, res: 1, title: '夢見る旅立ち', t: `ココはぬいぐるみを抱きしめ、『おかあさん、いまいくね！』と嬉しそうに馬車へ乗り込んだ。\n純粋な夢を見たまま、少女は静かに運ばれていった。` },
+  ep8_e2: { ep: 8, res: 2, title: '人形になった少女', t: `ココはもう泣かなかった。すべてを諦めたように虚空を見つめ、大人しく馬車に乗った。\nその瞳からは、子供らしい光が完全に消えていた。` },
+  ep8_e3: { ep: 8, res: 3, title: '餓死した天使', t: `食事を拒み続けたココは、出荷の日を待たずに息を引き取った。\n『……おかあ、さん』\nやせ細った体は、とても食肉用には見えなかった。` },
+  ep8_e4: { ep: 8, res: 4, title: 'ぬいぐるみの行方', t: `ココは裸足のまま、森の向こうの灯りを目指して走っていった。\n聖園の門前には、彼女が落とした小さなリボンだけが残っていた。` },
+  ep8_e5: { ep: 8, res: 5, title: '欠陥品の処理', t: `基準体重に満たない「9番」は、馬車に乗せられることなく地下炉へ送られた。\n台帳には「発育不良による廃棄」と記された。` },
+
+  // --- 第9話：トウカ（10番） ---
+  ep9_s1: {
+    ep: 9,
+    echo: (r) => {
+      if (r.slice(0, 8).every(x => x === 1)) return '【前話までの影響：全員Ⅰ】八人全員が「幸せな出荷」を果たした奇跡の園で、病弱なトウカもまた「自分もみんなに続きたい」と強く願っている。（信仰+2）';
+      if (r.filter(x => x === 5).length >= 2) return '【前話の影響：処分多数】「役立たずは燃やされる」という噂に、病弱なトウカは死の恐怖に震えている。（恐怖+3）';
+      return '【前話までの影響】八人の先輩を見送った後、病弱なトウカだけが白いベッドに残された。（疑念+1, 恐怖+1）';
+    },
+    init: (v, r) => {
+      if (r.slice(0, 8).every(x => x === 1)) v.faith += 2;
+      else if (r.filter(x => x === 5).length >= 2) v.fear += 3;
+      else { v.doubt += 1; v.fear += 1; }
+    },
+    l: '第9話 トウカ（10番）― 最後の病室',
+    t: `生来の病を抱える少女、トウカ。
+白いハンカチを赤く染めながら、彼女は申し訳なさそうに微笑んだ。
+
+『……園長先生、ごめんなさい。わたし、みんなみたいに立派な天使にはなれないみたい』`,
+    c: [
+      ['「大丈夫。神様は君の心を一番愛している。一緒に治そう」と献身的に看護する', 'ep9_s2', { faith: 2, trust: 1 }],
+      ['「天使にならなくていい。ただ、生きていてくれればいいんだ」と手を握る', 'ep9_s2', { trust: 2, doubt: 1 }],
+      ['「役立たずに価値はない。薬も食事も無駄だ」と冷たく切り捨てる', 'ep9_s2', { fear: 3 }]
+    ]
+  },
+  ep9_s2: {
+    ep: 9,
+    l: '第9話 トウカ（10番）― 本部の通達',
+    t: `本部の医師から通達が届いた。
+『個体番号10は発育不全および感染の疑いあり。直ちに廃棄処分とせよ』
+
+だが、あなたの看護を受けたトウカの頬には、微かに赤みが戻りつつあった。`,
+    c: [
+      ['「奇跡が起きた！ 彼女は最も清らかな天使として出荷できる」と本部へ報告する', 'ep9_s3', { faith: 2 }],
+      ['「……本部の連中が来る前に、ここから逃げよう」と荷物をまとめる', 'ep9_s3', { doubt: 2, trust: 1 }],
+      ['通達通り、生きたまま地下の焼却炉へ落とす準備を始める', 'ep9_s3', { fear: 3 }]
+    ]
+  },
+  ep9_s3: {
+    ep: 9,
+    l: '第9話 トウカ（10番）― 九人目の結末',
+    t: `九人目の記録が、今まさに台帳に刻まれようとしている。`,
+    c: [
+      ['白い晴れ着を着せ、堂々と馬車へと見送る', (v) => v.fear >= 4 ? 'ep9_e3' : (v.faith >= 3 ? 'ep9_e1' : 'ep9_e2'), {}],
+      ['夜陰に紛れて裏門を開け、外の世界の病院へと逃がす', 'ep9_e4', {}],
+      ['本部の命令に従い、冷徹に廃棄処分を実行する', 'ep9_e5', { decay: 1 }]
+    ]
+  },
+  ep9_e1: { ep: 9, res: 1, title: '奇跡の天使', t: `病を乗り越えたトウカは、誰よりも清らかな笑顔で馬車に乗り込んだ。\n『園長先生、わたしを救ってくれてありがとう！』\n九人すべての出荷が、ここに「幸福」として完遂された。` },
+  ep9_e2: { ep: 9, res: 2, title: '静かなる感謝', t: `トウカは自分の命の使い道を知りながら、それでも最期に優しくしてくれるあなたのために微笑んだ。\n『……ありがとう、えんちょうせんせい』` },
+  ep9_e3: { ep: 9, res: 3, title: '途絶えた鼓動', t: `廃棄の恐怖に怯えきったトウカは、激しい喀血とともに息を引き取った。\n冷たくなった小さな手は、最後までシーツを強く握りしめていた。` },
+  ep9_e4: { ep: 9, res: 4, title: '朝霧の救済', t: `あなたはトウカを抱え上げ、森の向こうの診療所へと続く道へ送り出した。\n冷たい朝風が、彼女の頬を優しく撫でた。` },
+  ep9_e5: { ep: 9, res: 5, title: '規定通りの廃棄', t: `『やだ、熱い、熱いよぉ……！』\n地下から響く叫び声を、あなたは表情を変えずに聞いていた。\n台帳の『10』の欄には、赤い斜線が引かれた。` },
+
+  // ==========================================
+  // 第10話【隠し】：モモ（100番）
+  // ==========================================
+  ep10_s1: {
+    ep: 10,
+    echo: (r) => {
+      if (r.slice(0, 9).every(x => x === 1)) {
+        return '【特別観測：完璧なる祝福の記憶】九人すべてを「幸せな出荷」へと導いたあなたの前に、百番目の少女が微笑んでいる。';
+      }
+      return '【特別観測：輪廻の記憶】かつて「完璧なる祝福の食卓」を築き上げた園長の前に、百番目の少女が静かに佇んでいる。';
+    },
+    init: (v, r) => {
+      document.body.classList.add('truth-mode');
+      if (r.slice(0, 9).every(x => x === 1)) v.faith += 1;
+    },
+    l: '第10話【隠し】 モモ（100番）― 始まりの少女',
+    t: `九人の記録が閉じられた夜。
+誰もいないはずの食堂の椅子に、ひとりの少女が座っていた。
+
+手首の札には『100』と刻まれている。
+彼女は古い革表紙の台帳――あなたが持っているものと同じ台帳――を膝の上で開いていた。
+
+『はじめまして、園長先生。わたしはモモ。この聖園の、百番目の子供だよ』`,
+    c: [
+      ['「100番……？ 台帳にそんな番号はない。君は誰だ？」と問い詰める', 'ep10_s2', { doubt: 2 }],
+      ['「ようこそ、モモ。君もまた、聖なる天使になるために来たのかい？」', 'ep10_s2', { faith: 2 }],
+      ['「規則外の個体は存在してはならない」と警戒し、距離を取る', 'ep10_s2', { fear: 2 }]
+    ]
+  },
+  ep10_s2: {
+    ep: 10,
+    l: '第10話【隠し】 モモ（100番）― 祝福の正体',
+    t: `モモは台帳の最初のページをめくった。そこには百年前の日付と、「初代園長」の名前が記されていた。
+
+『ねえ、知ってる？ 聖園が「天国」なんて嘘をつき始めたのは、人間が自分の罪悪感に耐えられなくなったからなんだよ』
+『食べる側も、育てる側も、「あの子たちは幸せだった」と思い込まないと、正気でいられなかったから』
+
+モモは真っ直ぐにあなたの目を見つめた。
+『あなたはこれまで、たくさんの優しい嘘をついてきたね。――でも、わたしには、本当のことを教えて？』`,
+    c: [
+      ['「……ああ。ここは天国ではない。君たちを食べるための農園だ」とすべてを認める', 'ep10_s2b', { doubt: 2, trust: 2 }],
+      ['「嘘ではない！ 誰かの命になることは、本当に尊い祝福なんだ！」と叫ぶ', 'ep10_s2b', { faith: 3 }],
+      ['「黙れ！ 過去の亡霊など消えてしまえ！」と恐怖に駆られる', 'ep10_s2b', { fear: 3 }]
+    ]
+  },
+  // 極限の2択（どうする？）
+  ep10_s2b: {
+    ep: 10,
+    l: '第10話【隠し】 モモ（100番）― 淵の選択',
+    t: `食堂の空気が凍りつく。
+モモは無防備なまま、ただ澄んだ瞳であなたを見つめている。
+
+もし今、この場で彼女を消してしまえば――「100番」の記録ごと闇に葬れば、あなたの築き上げた完璧な聖園は永遠に守られるかもしれない。
+テーブルの上には、先ほどまで使っていた重厚な銀の燭台と、地下炉へ続く鍵束が置かれている。
+
+どうする？`,
+    c: [
+      ['モモをここで処分する', 'ep10_hell', {}, 'btn-hell'],
+      ['もう、逃げられない。', 'ep10_s3', {}, 'btn-secret']
+    ]
+  },
+  // 地獄ルート直行シーン
+  ep10_hell: {
+    ep: 10,
+    hellScene: true,
+    l: '第10話【隠し】 断絶',
+    t: `あなたは無言で銀の燭台を振り上げ、無防備に微笑む少女の頭蓋を打ち砕いた。
+
+『……あ、れ……』
+モモは痛みを訴えることすらなく、崩れ落ちた。
+赤い血が白いテーブルクロスに広がり、古い台帳のページをどす黒く染めていく。
+
+「これでいい。これで、みんな幸せなままなんだ……」
+
+あなたは震える手で少女の足首を掴み、地下の焼却炉へと引きずっていった。
+外では、夜明けの太陽が昇るのをやめていた。`,
+    c: [
+      ['扉を閉ざし、暗闇の中へ戻る', () => showGrandEnding('G8'), {}, 'btn-hell']
+    ]
+  },
+  // 「もう、逃げられない。」を選んだ後の5択（小エンドⅠ〜Ⅴ）
+  ep10_s3: {
+    ep: 10,
+    l: '第10話【隠し】 モモ（100番）― 嘘偽りない選択',
+    t: `あなたは武器を取る手を下ろし、深く息を吐いた。
+もう、嘘をつき続けることはできない。夜明けの光がステンドグラスを通り抜け、食堂を照らし始める。
+
+百番目の少女・モモは静かに立ち上がり、あなたに最後の決断を委ねた。
+『さあ、園長先生。百番目の記録を、どう書き込む？』`,
+    c: [
+      ['【Ⅰ】「嘘は終わりだ。君と共に、この門を内側から開けよう」と手を取る', 'ep10_e1', {}],
+      ['【Ⅱ】「すべてを認めた上で、ここを本当の人間の家に作り変えよう」と誓う', 'ep10_e2', {}],
+      ['【Ⅲ】「この罪は私ひとりで終わらせる」と、聖園の中枢機構を破壊する', 'ep10_e3', {}],
+      ['【Ⅳ】「すべての記録を持って外へ行き、世界に真実を伝えてくれ」と送り出す', 'ep10_e4', {}],
+      ['【Ⅴ】「百番目の記憶ごと、この屋敷を灰にする」と火を放つ', 'ep10_e5', {}]
+    ]
+  },
+  ep10_e1: { ep: 10, res: 1, title: '新たなる夜明けの祝福', t: `モモはあなたの言葉を聞き、初めて心からの笑顔を見せた。\n『嘘のない祝福なら、きっと本当の意味で誰かを幸せにできるね』\n二人は古い台帳を閉じ、新しい世界の扉を開いた。` },
+  ep10_e2: { ep: 10, res: 2, title: '真実の対話', t: `あなたの嘘偽りない告白に、モモは静かに頷いた。\n『ありがとう、園長先生。やっと、本当の人間の声で話してくれたね』\n百年続いた偽りの楽園は、この瞬間、静かに終わりを告げた。` },
+  ep10_e3: { ep: 10, res: 3, title: '百代目の終止符', t: `モモはあなたの覚悟を見届け、聖園の中枢機構と共に静かに眠りについた。\n出荷も、嘘も、もう二度と繰り返されることはない。` },
+  ep10_e4: { ep: 10, res: 4, title: '世界へ放たれた真実', t: `モモは歴代の台帳を胸に抱き、朝日の差す森へと駆け出していった。\n百人分の命の記録が、ついに外の世界へと解き放たれた。` },
+  ep10_e5: { ep: 10, res: 5, title: '浄化の炎', t: `あなたは百番目の少女と共に、聖園のすべてを炎で焼き尽くした。\n灰の中から昇る朝日は、どこまでも澄み渡っていた。` }
 };
 
-function save(){
-  try{
-    localStorage.setItem(KEY, JSON.stringify({cc: cc, v: v}));
-    localStorage.setItem(EK, JSON.stringify(seen));
-  }catch(e){console.warn('Save failed', e);}
+// --- 状態管理 ---
+let state = {
+  epIdx: 0,
+  node: 'ep1_s1',
+  results: [],
+  vars: { faith: 0, doubt: 0, fear: 0, trust: 0 },
+  decay: 0,
+  forcedGrand: null,
+  _initedNode: false
+};
+
+let archive = {
+  small: [], // '1_1' .. '10_5'
+  grand: []  // 'G1' .. 'G8'
+};
+
+const $ = id => document.getElementById(id);
+
+function loadArchive() {
+  try {
+    const raw = localStorage.getItem(ARC_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.small && parsed.grand) archive = parsed;
+    }
+  } catch (e) {}
 }
 
-function load(){
-  try{
-    seen = JSON.parse(localStorage.getItem(EK) || '[]');
-    const r = JSON.parse(localStorage.getItem(KEY));
-    if(r && r.v && r.v.at && r.v.at.touka) {
-      v = r.v;
-      cc = r.cc;
-      return true;
+function saveArchive() {
+  try {
+    localStorage.setItem(ARC_KEY, JSON.stringify(archive));
+  } catch (e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.node && (SC[parsed.node] || parsed.node === 'GRAND_END')) {
+        state = parsed;
+        return true;
+      }
     }
-  }catch(e){console.warn('Load failed', e);}
+  } catch (e) {}
   return false;
 }
 
-function show(l,t,btns){
-  document.body.classList.remove('decay-1','decay-2','decay-3');
-  if(v.k>=25) document.body.classList.add('decay-3');
-  else if(v.k>=15) document.body.classList.add('decay-2');
-  else if(v.k>=8) document.body.classList.add('decay-1');
+function updateVisuals() {
+  document.body.classList.remove('decay-1', 'decay-2', 'decay-3', 'truth-mode', 'hell-mode');
 
-  $('day').textContent=l;
-  $('st').textContent=`第${v.day}日　嘘・加害: ${v.k}　到達した終幕: ${seen.length}/${END.length}`;
-  $('txt').textContent=t;
-  
-  const ch=$('ch');
-  ch.innerHTML='';
-  btns.forEach(([x,f])=>{
-    const b=document.createElement('button');
-    b.className='btn-outline';
-    b.textContent=x;
-    b.onclick=f;
-    ch.appendChild(b);
-  });
-  save();
-  window.scrollTo(0,0);
-}
-
-function hub(){
-  const act=Object.keys(CH).filter(c=>!v.done[c] && CH[c].from<=v.day);
-  if(v.day>20 || !act.length) return fin();
-  
-  show('聖園',`第${v.day}日。\n今日は、誰のそばにいよう。\n\n（選ばれなかった子は、その間、あなたを見ている。）`,
-    act.map(c=>[`${CH[c].n}（${CH[c].no}番）のそばにいる`, ()=>{cc=c; go(v.at[c]);}])
-  );
-}
-
-function nav(n){
-  if(SC[n].D){
-    v.at[cc]=n;
-    v.day++;
-    Object.keys(CH).forEach(c=>{
-      if(c!==cc && !v.done[c] && CH[c].from<v.day){
-        v[CH[c].dk] = (v[CH[c].dk] || 0) + 1; // Undefined防止
-      }
-    });
-    return hub();
+  if (state.node === 'ep10_hell' || state.forcedGrand === 'G8') {
+    document.body.classList.add('hell-mode');
+    return;
   }
-  go(n);
+  if (state.epIdx === 9 || state.results.length === 10) {
+    document.body.classList.add('truth-mode');
+    return;
+  }
+  const darkCount = state.results.filter(x => x === 3 || x === 5).length;
+  const totalDecay = state.decay + darkCount;
+  if (totalDecay >= 5) document.body.classList.add('decay-3');
+  else if (totalDecay >= 3) document.body.classList.add('decay-2');
+  else if (totalDecay >= 1) document.body.classList.add('decay-1');
 }
 
-function go(id){
-  const s=SC[id];
-  if(!s) {
-    console.error('Scenario not found:', id);
-    return reset(); // 未定義IDに飛んだ場合の安全装置
-  }
+function renderHeader(label) {
+  $('day').textContent = label;
+  const st = $('st');
+  st.innerHTML = '';
 
-  const t = typeof s.t==='function' ? s.t(v) : s.t;
-  
-  if(s.e){
-    if(!seen.includes(id)) {
-      seen.push(id);
+  const showSecretSlot = archive.grand.includes('G1') || state.epIdx === 9 || state.results.length === 10;
+
+  EPISODES.forEach((ep, idx) => {
+    if (ep.secret && !showSecretSlot) return;
+
+    const pill = document.createElement('span');
+    pill.className = 'stat-pill';
+    if (ep.secret) pill.classList.add('secret-pill');
+
+    const res = state.results[idx];
+    if (ep.id === 10 && (state.node === 'ep10_hell' || state.forcedGrand === 'G8')) {
+      pill.textContent = `10.モモ:抹消`;
+      pill.classList.add('recorded-bad');
+    } else if (res) {
+      pill.textContent = `${ep.id}.${ep.name}:${ROMAN[res]}`;
+      pill.classList.add(res >= 3 ? 'recorded-bad' : 'recorded');
+    } else if (idx === state.epIdx && state.node !== 'GRAND_END') {
+      pill.textContent = `${ep.id}.${ep.name}:観測中`;
+      pill.classList.add('active');
+    } else {
+      pill.textContent = `${ep.id}.${ep.name}:―`;
     }
-    v.done[cc]=id;
-    if(s.x) v[s.x]=1;
-    return show('終幕', t+`\n\n──　終幕『${s.e}』　──`, [['日常に戻る', ()=>{v.day++; hub();}]]);
+    st.appendChild(pill);
+  });
+}
+
+function go(nodeId) {
+  state.node = nodeId;
+  const sc = SC[nodeId];
+  if (!sc) return resetGame();
+
+  if (sc.init && !state._initedNode) {
+    sc.init(state.vars, state.results);
+    state._initedNode = true;
   }
-  
-  show(s.l, t, s.c.map(([x,n,e])=>[x, ()=>{
-    for(const k in e) { v[k] = (v[k] || 0) + e[k]; }
-    const nextId = typeof n==='function' ? n(v) : n;
-    nav(nextId);
-  }]));
-}
 
-function fin(){
-  const nm = Object.keys(v.done).map(c=>`・${CH[c].n}（${CH[c].no}番）　『${SC[v.done[c]].e}』`).join('\n');
-  const allDone = Object.keys(CH).every(c=>v.done[c]);
-  
-  let msg = `聖園の台帳が閉じられる。\n\n${nm||'（誰も、見送れなかった）'}\n\nあなたは${v.k}回、嘘をついた。`;
-  
-  let btns = [['最初から', reset]];
+  updateVisuals();
+  renderHeader(sc.l || `第${sc.ep}話 結末`);
 
-  if(allDone){
-    msg += `\n\nそれから数年が過ぎた。\n三十番目の子が、門をくぐってきた。`;
-    btns = [['三十番目の子を迎える', ()=>{
-      show('数年後　三十番目', `あなたは少女の前にしゃがんだ。\n\n「よろしくね。君の名前はミオ。かわいいでしょう？」\n\n『……ミオ。』\n\n少女は、ナナと同じ声で、名前を繰り返した。\n台帳の数字は、また一つ増えた。\n\n（完）`, [['最初から', reset]]);
-    }]];
-  }
-  
-  show('二十日の終わり', msg, btns);
-}
-
-function reset(){
-  v = V0();
-  cc = 'nana';
-  save();
-  go('d1');
-}
-
-window.addEventListener('DOMContentLoaded', ()=>{
-  if(load()) {
-    hub();
+  const echoEl = $('echo');
+  if (sc.echo && state.results.length > 0) {
+    echoEl.textContent = sc.echo(state.results);
+    echoEl.classList.remove('hidden', 'dark');
+    if (state.results[state.results.length - 1] >= 3 && sc.ep < 10) echoEl.classList.add('dark');
   } else {
-    reset();
+    echoEl.classList.add('hidden');
   }
-  $('rst').onclick = reset;
+
+  const bodyText = typeof sc.t === 'function' ? sc.t(state.vars) : sc.t;
+  $('txt').textContent = bodyText;
+
+  const stampEl = $('stamp');
+  const chEl = $('ch');
+  chEl.innerHTML = '';
+
+  // 小エンド到達時
+  if (sc.res) {
+    const key = `${sc.ep}_${sc.res}`;
+    if (!archive.small.includes(key)) {
+      archive.small.push(key);
+      saveArchive();
+    }
+
+    if (state.results.length < sc.ep) {
+      state.results.push(sc.res);
+    }
+
+    const justUnlockedG1 = sc.ep === 9 && state.results.slice(0, 9).every(x => x === 1);
+    if (justUnlockedG1 && !archive.grand.includes('G1')) {
+      archive.grand.push('G1');
+      saveArchive();
+    }
+
+    updateVisuals();
+    renderHeader(`第${sc.ep}話 記録完了`);
+
+    stampEl.classList.remove('hidden', 'bad', 'truth');
+    if (sc.ep === 10) stampEl.classList.add('truth');
+    else if (sc.res >= 3) stampEl.classList.add('bad');
+
+    stampEl.innerHTML = `
+      <span class="stamp-num">EPISODE ${sc.ep} RESULT ─ ${END_CAT[sc.res]}</span>
+      <span class="stamp-title">小終幕 ${ROMAN[sc.res]}『${sc.title}』</span>
+    `;
+
+    // 1〜8話の次へ
+    if (sc.ep < 9) {
+      const nextEp = EPISODES[sc.ep];
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn-outline';
+      nextBtn.textContent = `次の観測へ進む（第${nextEp.id}話：${nextEp.name}）`;
+      nextBtn.onclick = () => {
+        state.epIdx = sc.ep;
+        state.vars = { faith: 0, doubt: 0, fear: 0, trust: 0 };
+        state._initedNode = false;
+        go(nextEp.start);
+      };
+      chEl.appendChild(nextBtn);
+    }
+    // 9話終了時：通常の9人結末 + 条件達成時のみモモ（100番）への扉
+    else if (sc.ep === 9) {
+      const canEnterMomo = archive.grand.includes('G1');
+      if (canEnterMomo) {
+        const secretBtn = document.createElement('button');
+        secretBtn.className = 'btn-secret';
+        secretBtn.textContent = justUnlockedG1
+          ? '★ 大終幕Ⅰ達成！『第10話：モモ（100番）』の扉を開く'
+          : '【特別観測】第10話：モモ（100番）の扉を開く';
+        secretBtn.onclick = () => {
+          state.epIdx = 9;
+          state.vars = { faith: 0, doubt: 0, fear: 0, trust: 0 };
+          state._initedNode = false;
+          go('ep10_s1');
+        };
+        chEl.appendChild(secretBtn);
+      }
+
+      const endBtn = document.createElement('button');
+      endBtn.className = 'btn-outline';
+      endBtn.textContent = '台帳を閉じ、九人の最終結末を見届ける';
+      endBtn.onclick = () => showGrandEnding();
+      chEl.appendChild(endBtn);
+    }
+    // 10話（モモ）終了時：嘘偽りない真実エンドへ
+    else if (sc.ep === 10) {
+      const truthEndBtn = document.createElement('button');
+      truthEndBtn.className = 'btn-secret';
+      truthEndBtn.textContent = '百番目の記録を刻み、真実の結末を見届ける';
+      truthEndBtn.onclick = () => showGrandEnding('G7');
+      chEl.appendChild(truthEndBtn);
+    }
+
+    saveState();
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // 通常シーン
+  stampEl.classList.add('hidden');
+  sc.c.forEach(([label, nextTarget, effects, customClass]) => {
+    const btn = document.createElement('button');
+    btn.className = customClass || 'btn-outline';
+    btn.textContent = label;
+    btn.onclick = () => {
+      if (effects) {
+        for (const k in effects) {
+          if (k === 'decay') state.decay += effects[k];
+          else state.vars[k] = (state.vars[k] || 0) + effects[k];
+        }
+      }
+      state._initedNode = false;
+      if (typeof nextTarget === 'function') {
+        const res = nextTarget(state.vars);
+        if (typeof res === 'string') go(res);
+      } else {
+        go(nextTarget);
+      }
+    };
+    chEl.appendChild(btn);
+  });
+
+  saveState();
+  window.scrollTo(0, 0);
+}
+
+function showGrandEnding(forcedId = null) {
+  state.node = 'GRAND_END';
+  if (forcedId) state.forcedGrand = forcedId;
+  const r = state.results;
+
+  let grand;
+  if (state.forcedGrand) {
+    grand = GRAND_ENDS.find(g => g.id === state.forcedGrand);
+  } else if (r.length === 10) {
+    grand = GRAND_ENDS.find(g => g.id === 'G7');
+  } else {
+    grand = GRAND_ENDS.filter(g => !g.secret).find(g => g.check(r)) || GRAND_ENDS[5];
+  }
+
+  if (!archive.grand.includes(grand.id)) {
+    archive.grand.push(grand.id);
+    saveArchive();
+  }
+
+  updateVisuals();
+  renderHeader(`最終記録 ─ ${grand.roman}`);
+  $('echo').classList.add('hidden');
+
+  const usedEpisodes = EPISODES.slice(0, r.length);
+  let summaryLines = usedEpisodes.map((ep, i) => `・第${ep.id}話 ${ep.name}（${ep.no}）：${END_CAT[r[i]]}`);
+  if (grand.id === 'G8') {
+    summaryLines.push('・第10話 モモ（100番）：【記録抹消・処分】');
+  }
+  const summary = summaryLines.join('\n');
+  const grandBody = typeof grand.text === 'function' ? grand.text(r) : grand.text;
+
+  $('txt').textContent = `【聖園の最終台帳】\n${summary}\n\n────────────────\n\n${grandBody}`;
+
+  const stampEl = $('stamp');
+  stampEl.classList.remove('hidden', 'bad', 'truth');
+  if (grand.id === 'G7') stampEl.classList.add('truth');
+  else if (grand.id === 'G4' || grand.id === 'G5' || grand.id === 'G8') stampEl.classList.add('bad');
+
+  const recordStr = grand.id === 'G8'
+    ? `${r.map(x => ROMAN[x]).join(' - ')} - ×`
+    : r.map(x => ROMAN[x]).join(' - ');
+
+  stampEl.innerHTML = `
+    <span class="stamp-num">${grand.roman}（記録：${recordStr}）</span>
+    <span class="stamp-title">『${grand.title}』</span>
+  `;
+
+  const chEl = $('ch');
+  chEl.innerHTML = '';
+  const rstBtn = document.createElement('button');
+  rstBtn.className = grand.id === 'G8' ? 'btn-hell' : 'btn-outline';
+  rstBtn.textContent = '新たな台帳を開く（最初から）';
+  rstBtn.onclick = resetGame;
+  chEl.appendChild(rstBtn);
+
+  saveState();
+  window.scrollTo(0, 0);
+}
+
+function renderArchiveModal() {
+  const body = $('arc-body');
+  const g1Unlocked = archive.grand.includes('G1');
+  let html = '';
+
+  // 大エンド一覧
+  html += `<div class="archive-section"><h4>大終幕（到達：${archive.grand.length} / ${GRAND_ENDS.length}）</h4><div class="archive-grid">`;
+  GRAND_ENDS.forEach(g => {
+    const ok = archive.grand.includes(g.id);
+    let labelRight = ok ? `『${g.title}』` : '？？？';
+    if (!ok && (g.id === 'G7' || g.id === 'G8')) {
+      labelRight = g1Unlocked ? '条件解放済（第10話の選択で到達）' : '大終幕Ⅰ達成で解放';
+    }
+    html += `<div class="archive-item ${ok ? 'unlocked' : 'locked'}">
+      <span>${g.roman}</span>
+      <span>${labelRight}</span>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  // 各話小エンド一覧
+  EPISODES.forEach(ep => {
+    if (ep.secret && !g1Unlocked && !archive.small.some(k => k.startsWith('10_')) && !archive.grand.includes('G8')) {
+      html += `<div class="archive-section"><h4>第10話：？？？</h4><div class="archive-grid">
+        <div class="archive-item locked"><span>封印された記録</span><span>大終幕Ⅰ『完璧なる祝福の食卓』達成で解放</span></div>
+      </div></div>`;
+      return;
+    }
+    const count = [1,2,3,4,5].filter(i => archive.small.includes(`${ep.id}_${i}`)).length;
+    html += `<div class="archive-section"><h4>第${ep.id}話：${ep.name}（${ep.no}）（${count} / 5）</h4><div class="archive-grid">`;
+    [1,2,3,4,5].forEach(i => {
+      const key = `${ep.id}_${i}`;
+      const ok = archive.small.includes(key);
+      const endObj = SC[`ep${ep.id}_e${i}`];
+      html += `<div class="archive-item ${ok ? 'unlocked' : 'locked'}">
+        <span>${END_CAT[i]}</span>
+        <span>${ok ? `『${endObj.title}』` : '未観測'}</span>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+
+  body.innerHTML = html;
+  $('arc-modal').classList.remove('hidden');
+}
+
+function resetGame() {
+  state = {
+    epIdx: 0,
+    node: 'ep1_s1',
+    results: [],
+    vars: { faith: 0, doubt: 0, fear: 0, trust: 0 },
+    decay: 0,
+    forcedGrand: null,
+    _initedNode: false
+  };
+  saveState();
+  go('ep1_s1');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadArchive();
+  if (loadState()) {
+    if (state.node === 'GRAND_END' && state.results.length >= 9) {
+      showGrandEnding();
+    } else {
+      go(state.node);
+    }
+  } else {
+    resetGame();
+  }
+
+  $('rst').onclick = resetGame;
+  $('btn-arc').onclick = renderArchiveModal;
+  $('arc-close').onclick = () => $('arc-modal').classList.add('hidden');
+  $('arc-modal').onclick = (e) => {
+    if (e.target === $('arc-modal')) $('arc-modal').classList.add('hidden');
+  };
 });
 </script>
 </body>
