@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name=”robots” content=”noindex, nofollow” >
+<meta name="robots" content="noindex, nofollow">
 <title>祝福の食卓</title>
 <style>
   :root {
@@ -350,16 +350,23 @@
   .child-actions {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    gap: 5px;
     position: relative;
     z-index: 2;
   }
 
   .child-actions button {
-    padding: 8px 4px;
-    font-size: 0.8rem;
+    padding: 8px 2px;
+    font-size: 0.78rem;
     flex-direction: column;
     gap: 2px;
+    white-space: nowrap;
+  }
+
+  .child-actions button small {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    letter-spacing: 0;
   }
 
   .ship-btn {
@@ -412,7 +419,7 @@
   .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(5, 4, 3, 0.86);
+    background: rgba(5, 4, 3, 0.88);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -490,22 +497,22 @@
     <div class="header-top">
       <div class="day-badge" id="ui-day">第 1 日 / 全 25 日</div>
       <div style="display:flex; gap:6px;">
-        <button class="btn-outline" style="padding:4px 9px; font-size:0.75rem;" onclick="UI.openDiaryModal()">観察日誌</button>
-        <button class="btn-outline" style="padding:4px 9px; font-size:0.75rem;" onclick="Game.confirmReset()">初期化</button>
+        <button class="btn-outline" id="btn-diary" style="padding:4px 9px; font-size:0.75rem;">観察日誌</button>
+        <button class="btn-outline" id="btn-reset" style="padding:4px 9px; font-size:0.75rem;">初期化</button>
       </div>
     </div>
     <div class="stats-row">
       <span class="stat-pill" id="ui-ap">残り行動: 3 / 3</span>
       <span class="stat-pill" id="ui-budget">運営資金: 1000G</span>
-      <span class="stat-pill" id="ui-shipped">卒業(出荷): 0人</span>
+      <span class="stat-pill" id="ui-shipped">卒業: 0人</span>
       <span class="stat-pill" id="ui-escaped">逃亡: 0人</span>
     </div>
   </header>
 
   <!-- 全体コマンド -->
   <div class="global-actions">
-    <button class="btn-blue" id="btn-prayer-all" onclick="Game.massPrayer()">礼拝堂で全員祈祷 (AP1)</button>
-    <button class="btn-primary" id="btn-next-day" onclick="Game.nextDay()">一日を終える ➔</button>
+    <button class="btn-blue" id="btn-prayer-all">礼拝堂で全員祈祷 (AP1)</button>
+    <button class="btn-primary" id="btn-next-day">一日を終える ➔</button>
   </div>
 
   <!-- 園児リスト -->
@@ -521,7 +528,7 @@
   </div>
 </div>
 
-<!-- 汎用モーダル（イベント・異端児・エンディング・日記） -->
+<!-- 汎用モーダル（イベント・異端児・エンディング・日記・確認） -->
 <div class="modal-overlay hidden" id="ui-modal">
   <div class="modal-box" id="ui-modal-box">
     <h3 class="modal-title" id="ui-modal-title">タイトル</h3>
@@ -532,10 +539,11 @@
 
 <script>
 /**
- * 聖園の園長日誌 - コアロジック
+ * 聖園の園長日誌 - コアロジック（v4: 最終クリーン版）
  */
-const STORAGE_KEY = 'seien_save_v1';
+const STORAGE_KEY = 'seien_save_v4';
 const MAX_DAYS = 25;
+const FEED_COST = 80;
 
 const TRAITS = [
   { id: 'devout', name: '純粋無垢', desc: '信仰心が上がりやすく下がりにくい', faithMod: 1.3, fearMod: 0.8, growthMod: 1.0 },
@@ -664,9 +672,9 @@ const DAILY_EVENTS = [
     text: (c) => `${c.name}が微熱を出してベッドで横になっている。放置すると肉質（育成度）が落ちてしまうが、薬を使うには資金がかかる。`,
     choices: [
       {
-        text: '高価な栄養点滴と薬を投与する（資金 -200G）',
-        cond: (s) => s.budget >= 200,
-        effect: (s, c) => { s.budget -= 200; c.growth += 5; c.fear -= 10; return `手厚い看護に${c.name}は感謝し、すぐに元気を取り戻した。`; }
+        text: '高価な栄養点滴と薬を投与する（資金 -150G）',
+        cond: (s) => s.budget >= 150,
+        effect: (s, c) => { s.budget -= 150; c.growth += 5; c.fear -= 10; return `手厚い看護に${c.name}は感謝し、すぐに元気を取り戻した。`; }
       },
       {
         text: '温かいお粥だけ食べさせて様子を見る',
@@ -676,6 +684,13 @@ const DAILY_EVENTS = [
   }
 ];
 
+function generateId(index = 0) {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return 'c_' + crypto.randomUUID();
+  }
+  return 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9) + '_' + index;
+}
+
 const Game = {
   state: null,
   isBusy: false,
@@ -684,12 +699,12 @@ const Game = {
     const shuffledNames = [...NAME_POOL].sort(() => Math.random() - 0.5);
     const children = [];
     for (let i = 0; i < 5; i++) {
-      const trait = TRAITS[Math.floor(Math.random() * TRAITS.length)];
+      const trait = { ...TRAITS[Math.floor(Math.random() * TRAITS.length)] };
       children.push({
-        id: 'c_' + Date.now() + '_' + i,
+        id: generateId(i),
         name: shuffledNames[i],
         trait: trait,
-        growth: 15 + Math.floor(Math.random() * 15),
+        growth: 20 + Math.floor(Math.random() * 15),
         faith: 65 + Math.floor(Math.random() * 20),
         fear: 5 + Math.floor(Math.random() * 10),
         heretic: false,
@@ -707,6 +722,7 @@ const Game = {
       shippedCount: 0,
       escapedCount: 0,
       killedCount: 0,
+      unshippedCount: 0,
       moralDecay: 0,
       isEnded: false,
       children: children,
@@ -717,11 +733,13 @@ const Game = {
   },
 
   init() {
+    this.isBusy = false;
+    UI.bindEvents();
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.children) && typeof parsed.day === 'number') {
+        if (parsed && Array.isArray(parsed.children) && typeof parsed.day === 'number' && !parsed.isEnded) {
           this.state = parsed;
           this.sanitizeState();
         } else {
@@ -741,14 +759,49 @@ const Game = {
   sanitizeState() {
     const s = this.state;
     s.day = Math.max(1, Math.min(MAX_DAYS + 1, Number(s.day) || 1));
-    s.ap = Math.max(0, Number(s.ap) || 0);
+    s.maxAp = Math.max(1, Number(s.maxAp) || 3);
+    s.ap = Math.max(0, Math.min(s.maxAp, Number(s.ap) || 0));
     s.budget = Math.max(0, Number(s.budget) || 0);
+    s.shippedCount = Math.max(0, Number(s.shippedCount) || 0);
+    s.escapedCount = Math.max(0, Number(s.escapedCount) || 0);
+    s.killedCount = Math.max(0, Number(s.killedCount) || 0);
+    s.unshippedCount = Math.max(0, Number(s.unshippedCount) || 0);
     s.moralDecay = Math.max(0, Number(s.moralDecay) || 0);
+    s.isEnded = Boolean(s.isEnded);
 
-    s.children.forEach(c => {
-      c.growth = Math.max(0, Math.min(100, Math.round(Number(c.growth) || 0)));
-      c.faith = Math.max(0, Math.min(100, Math.round(Number(c.faith) || 0)));
-      c.fear = Math.max(0, Math.min(100, Math.round(Number(c.fear) || 0)));
+    if (!Array.isArray(s.logs)) {
+      s.logs = [];
+    }
+
+    s.children = s.children.filter(c => c && typeof c === 'object').map((c, idx) => {
+      const fallbackTrait = TRAITS[0];
+      const validTrait = (c.trait && typeof c.trait === 'object')
+        ? {
+            id: String(c.trait.id || fallbackTrait.id),
+            name: String(c.trait.name || fallbackTrait.name),
+            desc: String(c.trait.desc || fallbackTrait.desc),
+            faithMod: Number(c.trait.faithMod) || 1.0,
+            fearMod: Number(c.trait.fearMod) || 1.0,
+            growthMod: Number(c.trait.growthMod) || 1.0
+          }
+        : { ...fallbackTrait };
+
+      const cleanDiary = Array.isArray(c.diary) && c.diary.length > 0
+        ? c.diary.slice(-10).map(String)
+        : ['入園初日。'];
+
+      return {
+        id: String(c.id || generateId(idx)),
+        name: String(c.name || NAME_POOL[idx % NAME_POOL.length]),
+        trait: validTrait,
+        growth: Math.max(0, Math.min(100, Math.round(Number(c.growth) || 0))),
+        faith: Math.max(0, Math.min(100, Math.round(Number(c.faith) || 0))),
+        fear: Math.max(0, Math.min(100, Math.round(Number(c.fear) || 0))),
+        heretic: Boolean(c.heretic),
+        inspected: Boolean(c.inspected),
+        quote: String(c.quote || NORMAL_QUOTES[0]),
+        diary: cleanDiary
+      };
     });
   },
 
@@ -762,13 +815,19 @@ const Game = {
   },
 
   addLog(text, type = 'normal') {
-    this.state.logs.unshift({ text: `[第${this.state.day}日] ${text}`, type });
+    this.state.logs.unshift({ text: `[第${Math.min(this.state.day, MAX_DAYS)}日] ${text}`, type });
     if (this.state.logs.length > 40) this.state.logs.pop();
+  },
+
+  appendDiary(child, entry) {
+    child.diary.push(entry);
+    if (child.diary.length > 10) {
+      child.diary.shift();
+    }
   },
 
   consumeAp(cost = 1) {
     if (this.state.ap < cost) {
-      alert('本日の行動回数（AP）が尽きている。「一日を終える」を選択せよ。');
       return false;
     }
     this.state.ap -= cost;
@@ -784,26 +843,31 @@ const Game = {
 
     const t = child.trait;
     if (actionType === 'feed') {
-      if (this.state.budget < 100) {
-        this.state.ap += 1;
-        alert('運営資金が不足している（給餌には100G必要）。');
-        return;
+      if (this.state.budget >= FEED_COST) {
+        this.state.budget -= FEED_COST;
+        const up = Math.round((18 + Math.random() * 6) * t.growthMod);
+        const fearUp = Math.round((2 + Math.random() * 4) * t.fearMod);
+        child.growth += up;
+        child.fear += fearUp;
+        child.quote = '「もぐもぐ……すごく美味しい！ これでまた卒業に近づいたね！」';
+        this.appendDiary(child, `${this.state.day}日目：特別なご飯を食べた。体がぽかぽかして重くなったよ。`);
+        this.addLog(`${child.name}に高栄養の食事を与えた。（育成 +${up}% / 恐怖 +${fearUp}）`);
+      } else {
+        const up = Math.round(8 * t.growthMod);
+        child.growth += up;
+        child.faith -= 5;
+        child.fear += 5;
+        child.quote = '「……今日のごはん、いつもより少し少ないね。でも我慢するよ！」';
+        this.appendDiary(child, `${this.state.day}日目：お粥と少しのパンを食べた。早く立派にならなきゃ。`);
+        this.addLog(`資金不足のため${child.name}に質素な食事を与えた。（育成 +${up}% / 信仰 -5 / 恐怖 +5）`);
       }
-      this.state.budget -= 100;
-      const up = Math.round((16 + Math.random() * 6) * t.growthMod);
-      const fearUp = Math.round((3 + Math.random() * 4) * t.fearMod);
-      child.growth += up;
-      child.fear += fearUp;
-      child.quote = '「もぐもぐ……すごく美味しい！ これでまた卒業に近づいたね！」';
-      child.diary.push(`${this.state.day}日目：特別なご飯を食べた。体がぽかぽかして重くなったよ。`);
-      this.addLog(`${child.name}に高栄養の食事を与えた。（育成 +${up}% / 恐怖 +${fearUp}）`);
     } else if (actionType === 'pray') {
-      const faithUp = Math.round((15 + Math.random() * 6) * t.faithMod);
-      const fearDown = 6;
+      const faithUp = Math.round((16 + Math.random() * 6) * t.faithMod);
+      const fearDown = 7;
       child.faith += faithUp;
       child.fear -= fearDown;
       child.quote = '「神様、園長先生、僕たちを美味しく育ててくれてありがとうございます……」';
-      child.diary.push(`${this.state.day}日目：園長先生と一緒にお祈りした。食べられる日が楽しみで仕方ない。`);
+      this.appendDiary(child, `${this.state.day}日目：園長先生と一緒にお祈りした。食べられる日が楽しみで仕方ない。`);
       this.addLog(`${child.name}と密室で祈祷を行った。（信仰 +${faithUp} / 恐怖 -${fearDown}）`, 'good');
     } else if (actionType === 'play') {
       const fearDown = Math.round(18 + Math.random() * 7);
@@ -811,11 +875,11 @@ const Game = {
       child.fear -= fearDown;
       child.faith += faithUp;
       child.quote = '「わーい！ 園長先生と遊ぶの大好き！ ずっとここにいたいな……あ、でも早く卒業もしなきゃ！」';
-      child.diary.push(`${this.state.day}日目：みんなでたくさん遊んで笑った。聖園は本当に天国みたい。`);
+      this.appendDiary(child, `${this.state.day}日目：みんなでたくさん遊んで笑った。聖園は本当に天国みたい。`);
       this.addLog(`${child.name}と無邪気に遊んで疑念を和らげた。（恐怖 -${fearDown}）`, 'good');
     } else if (actionType === 'inspect') {
       child.inspected = true;
-      const risk = child.fear >= 60 || child.faith <= 35 ? '【警戒：真実に気づきかけている】' : '【良好：純粋な信仰を保っている】';
+      const risk = child.fear >= 55 || child.faith <= 35 ? '【警戒：真実に気づきかけている】' : '【良好：純粋な信仰を保っている】';
       child.quote = `「くすぐったいよ園長先生！ 僕の体、ちゃんと美味しく育ってる？」`;
       this.addLog(`${child.name}の検品完了。性質[${t.name}] / ${risk}`);
     }
@@ -831,7 +895,7 @@ const Game = {
 
     this.state.children.forEach(c => {
       if (!c.heretic) {
-        c.faith += Math.round(8 * c.trait.faithMod);
+        c.faith += Math.round(9 * c.trait.faithMod);
         c.fear -= 4;
       }
     });
@@ -842,39 +906,53 @@ const Game = {
 
   shipChild(childId) {
     if (this.isBusy || this.state.isEnded) return;
-    const idx = this.state.children.findIndex(c => c.id === childId);
-    if (idx === -1) return;
-    const child = this.state.children[idx];
-
-    if (child.growth < 100 || child.heretic) return;
+    const child = this.state.children.find(c => c.id === childId);
+    if (!child || child.growth < 100 || child.heretic) return;
 
     this.isBusy = true;
+    UI.render();
     const isHappy = child.faith >= 50;
-    const reward = isHappy ? 650 : 400;
+    const reward = isHappy ? 600 : 380;
 
     UI.showModal(
       `卒業の儀式：${child.name}`,
       isHappy
         ? `${child.name}は真っ白な晴れ着に身を包み、満面の笑みで重い扉の前に立っている。\n\n「園長先生、今まで本当にありがとう！ 僕、最高に美味しいごちそうになって、みんなを幸せにするね！」\n\n迎えの黒い馬車に乗り込む瞬間まで、${child.name}は嬉しそうに手を振り続けていた。\n（出荷報酬 +${reward}G を獲得）`
-        : `${child.name}は少し不安そうに震えながらも、園長の言葉に従って迎えの車に乗り込んだ。\n\n「……本当に、お空の上に行けるんだよね……？」\n\n扉が閉まる直前、${child.name}の瞳から一粒の涙がこぼれた。\n（出荷報酬 +${reward}G を獲得／残った園児たちの恐怖度が少し上昇）`,
+        : `${child.name}は少し不安そうに震えながらも、園長の言葉に従って迎えの車に乗り込んだ。\n\n「……本当に、お空の上に行けるんだよね……？」\n\n扉が閉まる直前、${child.name}の瞳から一粒の涙がこぼれた。\n（出荷報酬 +${reward}G を獲得／残った園児たちの恐怖度が上昇）`,
       [
         {
           text: '穏やかな微笑みで見送る',
           cls: 'btn-primary',
           action: () => {
-            this.state.children.splice(idx, 1);
+            const currentIdx = this.state.children.findIndex(c => c.id === childId);
+            if (currentIdx !== -1) {
+              this.state.children.splice(currentIdx, 1);
+            }
             this.state.shippedCount += 1;
             this.state.budget += reward;
             if (!isHappy) {
-              this.state.children.forEach(other => other.fear += 10);
+              this.state.children.forEach(other => {
+                other.fear += 10;
+                this.checkChildState(other);
+              });
               this.state.moralDecay += 1;
             }
             this.addLog(`${child.name}が「卒業」を果たした。（報酬 +${reward}G）`, 'good');
-            this.isBusy = false;
             UI.closeModal();
-            this.checkAllGone();
-            this.save();
-            UI.render();
+
+            if (this.state.children.length === 0) {
+              this.isBusy = false;
+              this.triggerEnding();
+            } else if (this.state.children.some(c => c.heretic)) {
+              // 出荷のショックで新たに異端児が発生した場合は即座に審問へ移行
+              this.save();
+              UI.render();
+              this.processHereticQueue();
+            } else {
+              this.isBusy = false;
+              this.save();
+              UI.render();
+            }
           }
         }
       ]
@@ -883,23 +961,71 @@ const Game = {
 
   checkChildState(child) {
     this.sanitizeState();
-    if (!child.heretic && (child.faith <= 20 || child.fear >= 85)) {
+    // 恐怖95以上は異端化を飛び越えて即パニック状態へ（nextDayで脱走処理）
+    if (child.fear >= 95) return;
+
+    // 信仰20以下 または 恐怖75以上で異端化
+    if (!child.heretic && (child.faith <= 20 || child.fear >= 75)) {
       child.heretic = true;
+      child.faith = Math.min(child.faith, 15);
+      child.fear = Math.max(child.fear, 75);
       child.quote = '「嘘だ！！ 卒業なんて嘘だ！！ 僕たちは人間たちに食べられるんだ！ みんな逃げよう！！」';
       this.addLog(`【異端発生】${child.name}が真実に気づき、周囲に逃亡を呼びかけ始めた！`, 'danger');
     }
   },
 
-  nextDay() {
+  requestNextDay() {
     if (this.isBusy || this.state.isEnded) return;
-    this.isBusy = true;
 
-    const heretics = this.state.children.filter(c => c.heretic);
-    if (heretics.length > 0) {
-      heretics.forEach(h => {
+    const hasReadyToShip = this.state.children.some(c => c.growth >= 100 && !c.heretic);
+    const isFinalDayWithAp = this.state.day === MAX_DAYS && this.state.ap > 0 && this.state.children.length > 0;
+
+    if (hasReadyToShip || isFinalDayWithAp) {
+      const warnings = [];
+      if (hasReadyToShip) warnings.push('・育成度100%に達し、卒業（出荷）可能な園児がいます。');
+      if (isFinalDayWithAp) warnings.push(`・本日は最終日（第${MAX_DAYS}日）であり、まだ行動回数（AP）が残っています。`);
+
+      this.isBusy = true;
+      UI.render();
+      UI.showModal(
+        '一日の終了確認',
+        `${warnings.join('\n')}\n\nこのまま一日を終えてよろしいですか？`,
+        [
+          {
+            text: '一日を終える',
+            cls: 'btn-primary',
+            action: () => {
+              UI.closeModal();
+              this.executeNextDay();
+            }
+          },
+          {
+            text: 'まだ作業を続ける',
+            cls: 'btn-outline',
+            action: () => {
+              this.isBusy = false;
+              UI.closeModal();
+              UI.render();
+            }
+          }
+        ]
+      );
+      return;
+    }
+
+    this.isBusy = true;
+    UI.render();
+    this.executeNextDay();
+  },
+
+  executeNextDay() {
+    // 1. すでに異端化している園児からの疑念伝染（スナップショット基準で公平に適用）
+    const existingHeretics = this.state.children.filter(c => c.heretic);
+    if (existingHeretics.length > 0) {
+      existingHeretics.forEach(h => {
         this.state.children.forEach(other => {
           if (other.id !== h.id && !other.heretic) {
-            const spread = h.trait.id === 'leader' ? 22 : 14;
+            const spread = h.trait.id === 'leader' ? 20 : 12;
             other.faith -= spread;
             other.fear += spread;
           }
@@ -908,11 +1034,12 @@ const Game = {
       this.addLog(`異端化した園児の叫びにより、聖園内に疑念と恐怖が伝染している……！`, 'danger');
     }
 
+    // 2. 日次自然変動とセリフ更新
     this.state.children.forEach(c => {
       if (!c.heretic) {
         c.faith -= 3;
         c.fear += 2;
-        if (c.fear >= 50 || c.faith <= 40) {
+        if (c.fear >= 45 || c.faith <= 40) {
           c.quote = DOUBT_QUOTES[Math.floor(Math.random() * DOUBT_QUOTES.length)];
         } else {
           c.quote = NORMAL_QUOTES[Math.floor(Math.random() * NORMAL_QUOTES.length)];
@@ -921,31 +1048,39 @@ const Game = {
       this.checkChildState(c);
     });
 
-    const runners = this.state.children.filter(c => c.fear >= 100 && !c.heretic);
+    // 3. 恐怖95以上による単独パニック脱走
+    const runners = this.state.children.filter(c => c.fear >= 95);
     if (runners.length > 0) {
       runners.forEach(r => {
         this.state.escapedCount += 1;
-        this.addLog(`【脱走】恐怖に耐えかねた${r.name}が闇夜に紛れて鉄柵を乗り越えた！`, 'danger');
+        this.addLog(`【パニック脱走】極度の恐怖に錯乱した${r.name}が闇夜に紛れて鉄柵を乗り越えた！`, 'danger');
       });
-      this.state.children = this.state.children.filter(c => !(c.fear >= 100 && !c.heretic));
+      this.state.children = this.state.children.filter(c => c.fear < 95);
     }
 
     this.state.day += 1;
     this.state.ap = this.state.maxAp;
     this.sanitizeState();
 
+    // 4. 25日目終了または全員いなくなった場合
     if (this.state.day > MAX_DAYS || this.state.children.length === 0) {
+      if (this.state.children.length > 0) {
+        this.state.unshippedCount += this.state.children.length;
+        this.addLog(`【期限到来】育成未完了の園児${this.state.children.length}名が本部により強制回収された。`, 'danger');
+        this.state.children = [];
+      }
       this.isBusy = false;
       this.triggerEnding();
       return;
     }
 
-    const activeHeretic = this.state.children.find(c => c.heretic);
-    if (activeHeretic) {
-      this.triggerHereticCrisis(activeHeretic);
+    // 5. 異端審問イベント（複数人いる場合も順次処理）
+    if (this.state.children.some(c => c.heretic)) {
+      this.processHereticQueue();
       return;
     }
 
+    // 6. 通常ランダムイベント
     if (Math.random() < 0.75 && this.state.children.length > 0) {
       const target = this.state.children[Math.floor(Math.random() * this.state.children.length)];
       const ev = DAILY_EVENTS[Math.floor(Math.random() * DAILY_EVENTS.length)];
@@ -975,33 +1110,43 @@ const Game = {
     }
   },
 
-  triggerHereticCrisis(heretic) {
-    const othersCount = this.state.children.filter(c => c.id !== heretic.id).length;
+  processHereticQueue() {
+    const activeHeretic = this.state.children.find(c => c.heretic);
+    if (!activeHeretic) {
+      this.isBusy = false;
+      UI.closeModal();
+      if (this.state.children.length === 0) {
+        this.triggerEnding();
+      } else {
+        this.save();
+        UI.render();
+      }
+      return;
+    }
+
+    const othersCount = this.state.children.filter(c => c.id !== activeHeretic.id).length;
 
     UI.showModal(
-      `【異端審問】${heretic.name}の反乱`,
-      `${heretic.name}が食堂の椅子の上に立ち、涙と鼻水を流しながら叫んでいる！\n\n「目を覚ましてよみんな！！ 卒業した子は誰も天国になんて行ってない！ 僕たちはただの家畜なんだ！ 早く逃げないと食べられちゃう！！」\n\n他の子供たちが動揺し、重い玄関扉の方を振り返っている。どう対処する？`,
+      `【異端審問】${activeHeretic.name}の反乱`,
+      `${activeHeretic.name}が食堂の椅子の上に立ち、涙と鼻水を流しながら叫んでいる！\n\n「目を覚ましてよみんな！！ 卒業した子は誰も天国になんて行ってない！ 僕たちはただの家畜なんだ！ 早く逃げないと食べられちゃう！！」\n\n他の子供たちが動揺し、重い玄関扉の方を振り返っている。どう対処する？`,
       [
         {
           text: '優しく抱きしめて説得する（「悪い夢を見たんだね、大丈夫だよ」）',
           cls: 'btn-blue',
           action: () => {
-            const successChance = 0.35 + (heretic.faith / 100);
+            const successChance = 0.20 + (activeHeretic.faith / 100);
             if (Math.random() < successChance) {
-              heretic.heretic = false;
-              heretic.faith = 55;
-              heretic.fear = 35;
-              heretic.quote = '「……ごめんなさい、園長先生。僕、怖い夢を見ていたみたい……」';
-              this.addLog(`${heretic.name}は園長の言葉に泣き崩れ、再び純粋な信仰を取り戻した。`, 'good');
-              this.isBusy = false;
-              UI.closeModal();
-              this.save();
-              UI.render();
+              activeHeretic.heretic = false;
+              activeHeretic.faith = 50;
+              activeHeretic.fear = 40;
+              activeHeretic.quote = '「……ごめんなさい、園長先生。僕、怖い夢を見ていたみたい……」';
+              this.addLog(`${activeHeretic.name}は園長の言葉に泣き崩れ、再び純粋な信仰を取り戻した。`, 'good');
+              this.processHereticQueue();
             } else {
               const escapedNow = this.state.children.length;
               this.state.escapedCount += escapedNow;
               this.state.children = [];
-              this.addLog(`説得は失敗した！ ${heretic.name}が園長を突き飛ばし、全員で玄関から闇夜へ逃げ出した！`, 'danger');
+              this.addLog(`説得は失敗した！ ${activeHeretic.name}が園長を突き飛ばし、全員で玄関から闇夜へ逃げ出した！`, 'danger');
               this.isBusy = false;
               UI.closeModal();
               this.triggerEnding();
@@ -1013,18 +1158,15 @@ const Game = {
           cls: 'btn-primary',
           action: () => {
             this.state.moralDecay += 2;
-            this.state.children = this.state.children.filter(c => c.id !== heretic.id);
+            this.state.unshippedCount += 1;
+            this.state.children = this.state.children.filter(c => c.id !== activeHeretic.id);
             this.state.children.forEach(other => {
-              other.fear += 22;
+              other.fear += 18;
               other.faith -= 10;
               this.checkChildState(other);
             });
-            this.addLog(`${heretic.name}を地下室へ隔離（事実上の廃棄）した。残された子供たちは怯えている。`, 'danger');
-            this.isBusy = false;
-            UI.closeModal();
-            this.checkAllGone();
-            this.save();
-            UI.render();
+            this.addLog(`${activeHeretic.name}を地下室へ隔離（事実上の廃棄）した。残された子供たちは怯えている。`, 'danger');
+            this.processHereticQueue();
           }
         },
         {
@@ -1033,10 +1175,10 @@ const Game = {
           action: () => {
             this.state.moralDecay += 4;
             this.state.killedCount += 1;
-            this.state.children = this.state.children.filter(c => c.id !== heretic.id);
+            this.state.children = this.state.children.filter(c => c.id !== activeHeretic.id);
 
             if (othersCount === 0) {
-              this.addLog(`${heretic.name}を始末した。聖園にはもう誰も残っていない。`, 'danger');
+              this.addLog(`${activeHeretic.name}を始末した。聖園にはもう誰も残っていない。`, 'danger');
               this.isBusy = false;
               UI.closeModal();
               this.triggerEnding('slaughter');
@@ -1045,7 +1187,7 @@ const Game = {
 
             UI.showModal(
               '取り返しのつかない惨劇',
-              `鈍い音とともに${heretic.name}が床に崩れ落ち、冷たい石床に赤いシミが広がっていく。\n\nそれを目撃した${othersCount}人の子供たちが、悲鳴を上げて一斉に玄関へ殺到した！\n閂（かんぬき）を外されるまであと数秒しかない。どうする！？`,
+              `鈍い音とともに${activeHeretic.name}が床に崩れ落ち、冷たい石床に赤いシミが広がっていく。\n\nそれを目撃した${othersCount}人の子供たちが、悲鳴を上げて一斉に玄関へ殺到した！\n閂（かんぬき）を外されるまであと数秒しかない。どうする！？`,
               [
                 {
                   text: '諦めて扉を開けさせ、全員を逃がす',
@@ -1066,6 +1208,7 @@ const Game = {
                     this.state.killedCount += this.state.children.length;
                     this.state.children = [];
                     this.state.moralDecay += 10;
+                    this.addLog('逃げ惑う子供たちを一人残らず始末した。聖園は血の海と化した……。', 'danger');
                     this.isBusy = false;
                     UI.closeModal();
                     this.triggerEnding('slaughter');
@@ -1079,34 +1222,29 @@ const Game = {
     );
   },
 
-  checkAllGone() {
-    if (this.state.children.length === 0 && !this.state.isEnded) {
-      this.triggerEnding();
-    }
-  },
-
   triggerEnding(forceType = null) {
     this.state.isEnded = true;
+    this.isBusy = false;
     const s = this.state;
-    const total = s.shippedCount + s.escapedCount + s.killedCount;
+    const total = Math.max(1, s.shippedCount + s.escapedCount + s.killedCount + s.unshippedCount);
 
     let title = '';
     let body = '';
     let isBlood = false;
 
-    if (forceType === 'slaughter' || (s.killedCount > 0 && s.shippedCount === 0 && s.escapedCount === 0)) {
+    if (forceType === 'slaughter' || s.killedCount >= 2 || (s.killedCount > 0 && s.shippedCount === 0 && s.escapedCount === 0)) {
       isBlood = true;
       title = '終幕 III：『空っぽの聖園』（惨劇の跡）';
       body = `静寂が戻った食堂には、柱時計の秒針の音だけが響いている。\n\n白かった壁も、清潔だった床も、可愛らしい絵日記も、すべてが赤黒く染まり果てていた。\n\nここが数時間前まで綺麗な聖園だったとはおよそ思えない。\n\nあなたは返り血を拭うことも忘れ、ただ動かなくなった小さな体を見つめ続けていた。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 始末：${s.killedCount}人`;
-    } else if (s.escapedCount === 0 && s.killedCount === 0 && s.shippedCount > 0) {
+    } else if (s.escapedCount === 0 && s.killedCount === 0 && s.unshippedCount === 0 && s.shippedCount > 0) {
       title = '終幕 I：『祝福の食卓』';
       body = `すべての子供たちが、最後まで「食べられる幸せ」を信じきったまま、満面の笑みで聖園を卒業していった。\n\n本部からは「最高の肉質と純粋さだった」と多額の報奨金と賛辞が贈られた。\n\nステンドグラスから光の差し込む清潔な部屋では、すでに次の無垢な子供たちを迎えるための白いシーツが整えられている。\n\nあなたは穏やかな微笑みを浮かべ、新しい園児たちの到着を待った。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：0人`;
-    } else if (s.shippedCount >= Math.ceil(total / 2) && s.shippedCount > 0) {
+    } else if (s.shippedCount >= Math.ceil(total / 2) && s.shippedCount > 0 && s.escapedCount <= 2) {
       title = '終幕 II：『ほころびた楽園』';
-      body = `何人かの子供に逃げられ、いくつかの「不祥事」を闇に葬ることになったものの、過半数の子供たちは無事に『卒業』を果たした。\n\n聖園の運営はなんとか継続が決まり、今日も礼拝堂には子供たちの無邪気な賛美歌が響いている。\n\nしかし、夜の闇へ消えたあの子供たちが、外の世界で何を語るのか——鉄格子の窓の外を見つめるあなたの胸には、消えない不安の影が落ちていた。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 処分：${s.killedCount}人`;
+      body = `何人かの損失や「不祥事」があったものの、過半数の子供たちは無事に『卒業』を果たした。\n\n聖園の運営はなんとか継続が決まり、今日も礼拝堂には子供たちの無邪気な賛美歌が響いている。\n\nしかし、夜の闇へ消えたあの子供たちが、外の世界で何を語るのか——鉄格子の窓の外を見つめるあなたの胸には、消えない不安の影が落ちていた。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 廃棄・未達：${s.killedCount + s.unshippedCount}人`;
     } else {
       title = '終幕 III：『空っぽの聖園』（崩壊）';
-      body = `開け放たれた玄関の扉から、冷たい夜風が吹き込んでいる。\n\nほとんどの子供たちが聖園の真実に気づき、外の世界へと逃げ出してしまった。\n\n無人のベッドと、読みかけの絵本だけが取り残された清潔な部屋。\n遠くから、こちらへ向かってくる警邏隊のサイレンの音が少しずつ近づいてくる……。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 処分：${s.killedCount}人`;
+      body = `開け放たれた玄関の扉から、冷たい夜風が吹き込んでいる。\n\n多くの子供たちが逃げ出すか、あるいは出荷基準を満たせないまま期限を迎えてしまった。\n\n無人のベッドと、読みかけの絵本だけが取り残された清潔な部屋。\n遠くから、こちらへ向かってくる警邏隊のサイレンの音が少しずつ近づいてくる……。\n\n【最終記録】\n出荷（卒業）：${s.shippedCount}人 / 逃亡：${s.escapedCount}人 / 廃棄・未達：${s.killedCount + s.unshippedCount}人`;
     }
 
     localStorage.removeItem(STORAGE_KEY);
@@ -1131,16 +1269,59 @@ const Game = {
   },
 
   confirmReset() {
-    if (confirm('現在の進行データを破棄し、第1日からやり直しますか？')) {
-      localStorage.removeItem(STORAGE_KEY);
-      this.state = this.createInitialState();
-      this.save();
-      UI.render();
-    }
+    if (this.isBusy) return;
+    UI.showModal(
+      '台帳の初期化確認',
+      '現在の進行データを破棄し、第1日から新しい聖園を始めますか？\n（この操作は取り消せません）',
+      [
+        {
+          text: '破棄して最初からやり直す',
+          cls: 'btn-danger',
+          action: () => {
+            localStorage.removeItem(STORAGE_KEY);
+            UI.closeModal();
+            this.state = this.createInitialState();
+            this.save();
+            UI.render();
+          }
+        },
+        {
+          text: 'キャンセル',
+          cls: 'btn-outline',
+          action: () => UI.closeModal()
+        }
+      ]
+    );
   }
 };
 
 const UI = {
+  eventsBound: false,
+
+  bindEvents() {
+    if (this.eventsBound) return;
+    this.eventsBound = true;
+
+    document.getElementById('btn-diary').addEventListener('click', () => this.openDiaryModal());
+    document.getElementById('btn-reset').addEventListener('click', () => Game.confirmReset());
+    document.getElementById('btn-prayer-all').addEventListener('click', () => Game.massPrayer());
+    document.getElementById('btn-next-day').addEventListener('click', () => Game.requestNextDay());
+
+    document.getElementById('ui-children').addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn || btn.disabled) return;
+      const action = btn.dataset.action;
+      const childId = btn.dataset.id;
+      if (!childId) return;
+
+      if (action === 'ship') {
+        Game.shipChild(childId);
+      } else {
+        Game.actChild(childId, action);
+      }
+    });
+  },
+
   render() {
     const s = Game.state;
     if (!s) return;
@@ -1165,8 +1346,11 @@ const UI = {
     document.getElementById('ui-escaped').textContent = `逃亡: ${s.escapedCount}人`;
     document.getElementById('ui-moral-label').textContent = `園長の心: ${moralText}`;
 
-    const btnPrayer = document.getElementById('btn-prayer-all');
-    btnPrayer.disabled = s.ap < 1 || s.isEnded;
+    const locked = Game.isBusy || s.isEnded;
+    document.getElementById('btn-prayer-all').disabled = s.ap < 1 || locked || s.children.length === 0;
+    document.getElementById('btn-next-day').disabled = locked;
+    document.getElementById('btn-diary').disabled = locked || s.children.length === 0;
+    document.getElementById('btn-reset').disabled = Game.isBusy;
 
     const container = document.getElementById('ui-children');
     container.innerHTML = '';
@@ -1175,14 +1359,16 @@ const UI = {
       const card = document.createElement('div');
       card.className = 'child-card' + (c.heretic ? ' heretic' : '');
 
-      const canShip = c.growth >= 100 && !c.heretic;
+      const canShip = c.growth >= 100 && !c.heretic && !locked;
       const traitLabel = c.inspected ? `性質: ${c.trait.name}` : '性質: 未検品';
+      const feedLabel = s.budget >= FEED_COST ? `-${FEED_COST}G` : '質素(0G)';
+      const safeId = this.escapeHtml(c.id);
 
       card.innerHTML = `
         <div class="child-header">
           <div class="child-name-area">
             <span class="child-name">${this.escapeHtml(c.name)}</span>
-            <span class="trait-badge">${traitLabel}</span>
+            <span class="trait-badge">${this.escapeHtml(traitLabel)}</span>
             ${c.heretic ? '<span class="heretic-badge">覚醒（逃亡扇動中）</span>' : ''}
           </div>
         </div>
@@ -1205,18 +1391,18 @@ const UI = {
         </div>
         <div class="child-quote">${this.escapeHtml(c.quote)}</div>
         <div class="child-actions">
-          ${canShip ? `<button class="ship-btn" onclick="Game.shipChild('${c.id}')">✟ 卒業（出荷）を見送る</button>` : ''}
-          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'feed')">
-            <span>給餌</span><small style="font-size:0.65rem;color:var(--text-muted)">-100G</small>
+          ${canShip ? `<button class="ship-btn" data-action="ship" data-id="${safeId}">✟ 卒業（出荷）を見送る</button>` : ''}
+          <button class="btn-outline" ${s.ap < 1 || c.heretic || locked ? 'disabled' : ''} data-action="feed" data-id="${safeId}">
+            <span>給餌</span><small>${feedLabel}</small>
           </button>
-          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'pray')">
-            <span>祈祷</span><small style="font-size:0.65rem;color:var(--text-muted)">信仰↑</small>
+          <button class="btn-outline" ${s.ap < 1 || c.heretic || locked ? 'disabled' : ''} data-action="pray" data-id="${safeId}">
+            <span>祈祷</span><small>信仰↑</small>
           </button>
-          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'play')">
-            <span>遊戯</span><small style="font-size:0.65rem;color:var(--text-muted)">恐怖↓</small>
+          <button class="btn-outline" ${s.ap < 1 || c.heretic || locked ? 'disabled' : ''} data-action="play" data-id="${safeId}">
+            <span>遊戯</span><small>恐怖↓</small>
           </button>
-          <button class="btn-outline" ${s.ap < 1 || c.heretic ? 'disabled' : ''} onclick="Game.actChild('${c.id}', 'inspect')">
-            <span>検品</span><small style="font-size:0.65rem;color:var(--text-muted)">状態確認</small>
+          <button class="btn-outline" ${s.ap < 1 || c.heretic || locked ? 'disabled' : ''} data-action="inspect" data-id="${safeId}">
+            <span>検品</span><small>状態確認</small>
           </button>
         </div>
       `;
@@ -1231,6 +1417,7 @@ const UI = {
   },
 
   openDiaryModal() {
+    if (Game.isBusy || (Game.state && Game.state.isEnded)) return;
     const s = Game.state;
     if (!s || s.children.length === 0) return;
     const text = s.children.map(c => {
@@ -1257,11 +1444,17 @@ const UI = {
     bodyEl.textContent = body;
     choicesEl.innerHTML = '';
 
+    let clicked = false;
     choices.forEach(ch => {
       const btn = document.createElement('button');
       btn.className = ch.cls || 'btn-outline';
       btn.textContent = ch.text;
-      btn.onclick = ch.action;
+      btn.addEventListener('click', () => {
+        if (clicked) return;
+        clicked = true;
+        choicesEl.querySelectorAll('button').forEach(b => b.disabled = true);
+        ch.action();
+      });
       choicesEl.appendChild(btn);
     });
 
